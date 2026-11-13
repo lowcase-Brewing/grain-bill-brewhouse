@@ -98,10 +98,11 @@ bun run build
 
 Verification on 2026-11-13:
 
-- `bunx vitest run`: 5 test files, 90 tests passed.
+- `bunx vitest run`: 6 test files, 91 tests passed.
 - `oj typecheck -b --noEmit`: passed with no errors.
 - `bun run build`: production client, SSR, and Cloudflare-module build passed.
 - Playwright against the local app exercised recipe-form creation, reference-example calculation and save, exact saved OG, reload persistence, recipe editing without grain-bill loss, library editing with snapshot preservation, invalid-row OG suppression, and mobile drawer/bottom navigation.
+- A fresh `/` load returned HTTP 200 and rendered the dashboard with no console or page errors. Two mobile menu open/close cycles and a fresh reload also passed; forced AppShell hot refreshes with the drawer both closed and open produced no errors.
 - Actual JSON, Markdown, and manifest downloads were saved and inspected for recipe data, exact calculations, readable output, sanitized paths, and pending-automation metadata.
 
-Tests cover formula parity, grain/extract factors, readiness and validation, overflow, weights and blank rows, library uniqueness and PPG derivation, snapshots, storage envelopes and reset behavior, recipe duplication/write-back, export round trips, and path sanitization.
+Tests cover formula parity, grain/extract factors, readiness and validation, overflow, weights and blank rows, library uniqueness and PPG derivation, snapshots, storage envelopes and reset behavior, recipe duplication/write-back, export round trips, path sanitization, `/` route matching, and a real provider/AppShell render with Radix mobile-menu open/close.

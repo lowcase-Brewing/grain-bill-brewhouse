@@ -1,5 +1,7 @@
 # QA roadmap
 
+- [x] Investigate the root AppShell/Radix blank-screen report; verify fresh and hot-refresh renders, add a real shell regression check, and verify mobile menu open/close.
+
 - [x] Match source readiness: always validate efficiency; invalid entered target OG suppresses aggregate OG and delta.
 - [x] Reject non-finite row points, bill totals, aggregate points, and delta without displaying Infinity or NaN.
 - [x] Add regression tests and run tests, typecheck, and production build.
