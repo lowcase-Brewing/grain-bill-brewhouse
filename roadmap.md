@@ -1,5 +1,7 @@
 # QA roadmap
 
+- [x] Apply only missing fixes from the tested recovery patch, then verify tests, typecheck, production build, fresh preview, mobile menu, actual commit, and credit usage without enabling Cloud/auth or publishing.
+
 - [x] Investigate the root AppShell/Radix blank-screen report; verify fresh and hot-refresh renders, add a real shell regression check, and verify mobile menu open/close.
 
 - [x] Match source readiness: always validate efficiency; invalid entered target OG suppresses aggregate OG and delta.

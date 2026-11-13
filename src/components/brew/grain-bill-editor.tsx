@@ -133,7 +133,7 @@ function Cell({ label, children, className }: { label: string; children: ReactNo
   );
 }
 
-const GRID = "md:grid md:grid-cols-[minmax(0,2.6fr)_4.5rem_4.5rem_4.5rem_4rem_4.25rem_4.25rem_2.25rem] md:items-start md:gap-3";
+const GRID = "md:grid md:grid-cols-[minmax(0,2.6fr)_3.5rem_3.5rem_3.5rem_3rem_3.5rem_3.5rem_2rem] md:items-start md:gap-3";
 
 export function RowsEditor({
   rows,

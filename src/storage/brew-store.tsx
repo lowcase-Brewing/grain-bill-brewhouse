@@ -51,15 +51,22 @@ export function BrewStoreProvider({ children }: { children: ReactNode }) {
   const load = useCallback(async () => {
     const repo = repoRef.current;
     if (!repo) return;
-    const snap = await repo.loadAll();
-    setData(snap);
-    setSaveState(snap.issues.length ? "blocked" : "saved");
-    setStatus("ready");
+    try {
+      const snap = await repo.loadAll();
+      setData(snap);
+      setSaveState(snap.issues.length ? "blocked" : "saved");
+      setStatus("ready");
+    } catch {
+      setSaveState("error");
+      setStatus("unavailable");
+    }
   }, []);
 
   useEffect(() => {
     try {
-      repoRef.current = new LocalBrewRepository(window.localStorage);
+      const storage = window.localStorage;
+      if (!storage) throw new Error("Browser storage is unavailable");
+      repoRef.current = new LocalBrewRepository(storage);
     } catch {
       setStatus("unavailable");
       return;
