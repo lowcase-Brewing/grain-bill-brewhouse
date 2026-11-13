@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculatorRouteImport } from './routes/calculator'
+import { Route as MaltsRouteImport } from './routes/malts'
 import { Route as RecipesIndexRouteImport } from './routes/recipes.index'
 import { Route as RecipesNewRouteImport } from './routes/recipes.new'
 import { Route as RecipesRecipeIdIndexRouteImport } from './routes/recipes.$recipeId.index'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const CalculatorRoute = CalculatorRouteImport.update({
   id: '/calculator',
   path: '/calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaltsRoute = MaltsRouteImport.update({
+  id: '/malts',
+  path: '/malts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecipesIndexRoute = RecipesIndexRouteImport.update({
@@ -51,6 +57,7 @@ const RecipesRecipeIdGrainBillRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/malts': typeof MaltsRoute
   '/recipes/new': typeof RecipesNewRoute
   '/recipes/': typeof RecipesIndexRoute
   '/recipes/$recipeId/grain-bill': typeof RecipesRecipeIdGrainBillRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/malts': typeof MaltsRoute
   '/recipes/new': typeof RecipesNewRoute
   '/recipes': typeof RecipesIndexRoute
   '/recipes/$recipeId/grain-bill': typeof RecipesRecipeIdGrainBillRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/malts': typeof MaltsRoute
   '/recipes/new': typeof RecipesNewRoute
   '/recipes/': typeof RecipesIndexRoute
   '/recipes/$recipeId/grain-bill': typeof RecipesRecipeIdGrainBillRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/calculator'
+    | '/malts'
     | '/recipes/new'
     | '/recipes/'
     | '/recipes/$recipeId/grain-bill'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/calculator'
+    | '/malts'
     | '/recipes/new'
     | '/recipes'
     | '/recipes/$recipeId/grain-bill'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/calculator'
+    | '/malts'
     | '/recipes/new'
     | '/recipes/'
     | '/recipes/$recipeId/grain-bill'
@@ -103,6 +115,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculatorRoute: typeof CalculatorRoute
+  MaltsRoute: typeof MaltsRoute
   RecipesNewRoute: typeof RecipesNewRoute
   RecipesIndexRoute: typeof RecipesIndexRoute
   RecipesRecipeIdGrainBillRoute: typeof RecipesRecipeIdGrainBillRoute
@@ -123,6 +136,13 @@ declare module '@tanstack/react-router' {
       path: '/calculator'
       fullPath: '/calculator'
       preLoaderRoute: typeof CalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/malts': {
+      id: '/malts'
+      path: '/malts'
+      fullPath: '/malts'
+      preLoaderRoute: typeof MaltsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recipes/': {
@@ -159,6 +179,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculatorRoute: CalculatorRoute,
+  MaltsRoute: MaltsRoute,
   RecipesNewRoute: RecipesNewRoute,
   RecipesIndexRoute: RecipesIndexRoute,
   RecipesRecipeIdGrainBillRoute: RecipesRecipeIdGrainBillRoute,
