@@ -47,7 +47,7 @@ describe("sheet parity — reference example", () => {
     expect(r.differencePoints).toBeCloseTo(X.differencePoints, 10);
   });
   it("matches ingredient percentages of total bill (extract included)", () => {
-    r.rows.forEach((row, i) => expect(row.percentOfBill).toBeCloseTo(X.percentages[i], 5));
+    r.rows.forEach((row, i) => expect(row.percentOfBill).toBeCloseTo(X.percentages[i]!, 5));
   });
   it("displays OG 1.060 and delta +8.3", () => {
     expect(formatOG(r.estimatedOG!)).toBe("1.060");
@@ -203,9 +203,13 @@ describe("finite-input overflow protection", () => {
     expect(r.ogSuppressedReason).toMatch(/needs attention/);
   });
   it("suppresses bill totals when individually finite weights overflow their sum", () => {
+    const lowPpg = (name: string): GrainRowInput => ({
+      ...row(name, "1e308"),
+      ingredient: { ...snapshotIngredient(ing(name), NOW), ppg: 1 },
+    });
     const r = calculateGrainBill(
       S({ coldFermenterGal: "1e308", efficiencyPct: "1e-300" }),
-      [row("Maris Otter", "1e308"), row("Vienna Malt", "1e308")],
+      [lowPpg("Maris Otter"), lowPpg("Vienna Malt")],
     );
     expect(r.invalidRowCount).toBe(0);
     expect(r.totalWeightLb).toBeNull();
@@ -218,7 +222,7 @@ describe("finite-input overflow protection", () => {
   });
   it("suppresses aggregate points when finite row points overflow their sum", () => {
     const rows = Array.from({ length: 6 }, () => row("Maris Otter", "1"));
-    const r = calculateGrainBill(S({ coldFermenterGal: "1e-305", efficiencyPct: "1e-300" }), rows);
+    const r = calculateGrainBill(S({ coldFermenterGal: "1e-306", efficiencyPct: "100" }), rows);
     expect(r.invalidRowCount).toBe(0);
     expect(r.rows.every((x) => x.ogPoints !== null && Number.isFinite(x.ogPoints))).toBe(true);
     expect(r.totalWeightLb).toBe(6);

@@ -114,7 +114,7 @@ function Body() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="wf-recipe-folder">Recipe exports go in</Label>
-              <Select value={t.folders.includes(t.recipeFolder) ? t.recipeFolder : undefined} onValueChange={(v) => setT({ ...t, recipeFolder: v })}>
+              <Select value={t.folders.includes(t.recipeFolder) ? t.recipeFolder : ""} onValueChange={(v) => setT({ ...t, recipeFolder: v })}>
                 <SelectTrigger id="wf-recipe-folder"><SelectValue placeholder="Choose folder" /></SelectTrigger>
                 <SelectContent>{t.folders.filter((f) => f.trim()).map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
               </Select>
