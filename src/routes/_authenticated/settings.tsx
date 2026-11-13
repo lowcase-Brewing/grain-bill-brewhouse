@@ -148,7 +148,7 @@ function Body() {
 
       <Panel title="Planned integrations" description="Not active.">
         <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-          <li>Sign-in and per-user cloud storage: replace the browser repository with an authenticated backend (see README).</li>
+          <li>Google sign-in: not added yet; this version uses invite-only email and password accounts.</li>
           <li>Desktop helper or Google Drive integration: would consume the project manifest to create folders, after the AppleScript mapping is approved.</li>
           <li>Live Google Sheet sync: not planned yet; the library is a read-only snapshot from 2026-11-13.</li>
         </ul>
