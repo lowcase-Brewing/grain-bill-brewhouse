@@ -80,7 +80,7 @@ function Scratch() {
           title="Clear the scratch calculator?"
           description="Rows are removed and settings return to the sheet defaults."
           confirmLabel="Clear"
-          onConfirm={() => setState(baseline)}
+          onConfirm={() => resetWork(baseline)}
         />
       </div>
       <GrainBillWorkspace
@@ -108,7 +108,7 @@ function Scratch() {
           const created = await actions.createRecipe(r.value, rows);
           if (!created) return {};
           await actions.saveRecipe(applyGrainBillToRecipe(created, r.value.parameters, rows, result, nowIso()));
-          setState(baseline);
+          resetWork(baseline);
           setSaveOpen(false);
           toast.success(`Saved as “${created.name}”`);
           void navigate({ to: "/recipes/$recipeId", params: { recipeId: created.id } });
