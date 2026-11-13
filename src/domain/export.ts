@@ -66,10 +66,10 @@ export function parseRecipeExport(text: string): ParseExportResult {
   }
   if (!raw || typeof raw !== "object") return { ok: false, error: "Unrecognized file." };
   const o = raw as Record<string, unknown>;
-  if (o.format !== RECIPE_EXPORT_FORMAT) return { ok: false, error: "Not a lowcase Brewing recipe export." };
-  if (o.schemaVersion !== RECIPE_EXPORT_SCHEMA_VERSION)
-    return { ok: false, error: `Unsupported export version: ${String(o.schemaVersion)}.` };
-  const parsed = recipeSchema.safeParse(o.recipe);
+  if (o["format"] !== RECIPE_EXPORT_FORMAT) return { ok: false, error: "Not a lowcase Brewing recipe export." };
+  if (o["schemaVersion"] !== RECIPE_EXPORT_SCHEMA_VERSION)
+    return { ok: false, error: `Unsupported export version: ${String(o["schemaVersion"])}.` };
+  const parsed = recipeSchema.safeParse(o["recipe"]);
   if (!parsed.success) return { ok: false, error: "The recipe in this file failed validation." };
   return { ok: true, recipe: parsed.data as Recipe };
 }
@@ -101,7 +101,7 @@ export function recipeToMarkdown(recipe: Recipe, template: WorkflowTemplate, now
     md += `| Ingredient | Category | lb | oz | Total lb | PPG | % bill | OG pts |\n|---|---|---:|---:|---:|---:|---:|---:|\n`;
     recipe.grainBill.forEach((row, i) => {
       const r = result.rows[i];
-      if (r.status === "blank") return;
+      if (!r || r.status === "blank") return;
       md += `| ${mdEscape(row.ingredient?.name ?? "(none)")} | ${row.ingredient?.category ?? "—"} | ${mdEscape(row.lb || "—")} | ${mdEscape(row.oz || "—")} | ${r.weightLb === null ? "—" : formatLb(r.weightLb)} | ${r.ppg === null ? "—" : formatPpg(r.ppg)} | ${r.percentOfBill === null ? "—" : formatPercent(r.percentOfBill)} | ${r.ogPoints === null ? "—" : formatPoints(r.ogPoints)} |\n`;
     });
     md += `\n`;

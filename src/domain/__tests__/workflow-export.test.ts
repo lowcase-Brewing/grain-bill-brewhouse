@@ -49,7 +49,7 @@ describe("path sanitizing", () => {
     const m = buildProjectManifest({ name: "Novena Noche", version: "1.2.0", style: "Lager" }, PROPOSED_DEFAULT_WORKFLOW, NOW);
     expect(m.rootFolder).toBe("Novena Noche v1.2.0");
     expect(m.folders).toEqual(["Recipe", "Brew Logs", "Labels", "Assets"].map((f) => `Novena Noche v1.2.0/${f}`));
-    expect(m.files[0].path).toBe("Novena Noche v1.2.0/Recipe/novena-noche-v1.2.0.recipe.json");
+    expect(m.files[0]!.path).toBe("Novena Noche v1.2.0/Recipe/novena-noche-v1.2.0.recipe.json");
   });
 });
 
@@ -104,7 +104,7 @@ describe("recipe rules", () => {
     const r = sample();
     const d = duplicateRecipe(r, "rec-2", NOW, [r.name]);
     expect(d.name).toBe("Novena Noche (copy)");
-    d.grainBill[0].lb = "99";
-    expect(r.grainBill[0].lb).toBe("6");
+    d.grainBill[0]!.lb = "99";
+    expect(r.grainBill[0]!.lb).toBe("6");
   });
 });

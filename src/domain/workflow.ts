@@ -33,7 +33,7 @@ export function sanitizePathComponent(input: string, fallback = "untitled"): str
   s = s.replace(/^[.\-\s]+/, "").replace(/[.\s]+$/, "");
   if (s.length > MAX_COMPONENT_LENGTH) s = s.slice(0, MAX_COMPONENT_LENGTH).replace(/[.\s]+$/, "");
   if (!s) s = fallback;
-  const stem = s.split(".")[0];
+  const stem = s.split(".")[0] ?? s;
   if (RESERVED_WINDOWS.test(stem)) s = `_${s}`;
   return s;
 }

@@ -58,10 +58,10 @@ describe("LocalBrewRepository", () => {
   it("rejects stored libraries with duplicate names", async () => {
     const repo1 = new LocalBrewRepository(memStore(), () => NOW);
     const lib = (await repo1.loadAll()).library;
-    const raw = JSON.stringify({ schemaVersion: 1, savedAt: NOW, data: [lib[0], { ...lib[1], name: lib[0].name.toUpperCase() }] });
+    const raw = JSON.stringify({ schemaVersion: 1, savedAt: NOW, data: [lib[0]!, { ...lib[1]!, name: lib[0]!.name.toUpperCase() }] });
     const store = memStore({ [STORAGE_KEYS.library]: raw });
     const snap = await new LocalBrewRepository(store, () => NOW).loadAll();
-    expect(snap.issues[0].section).toBe("library");
+    expect(snap.issues[0]!.section).toBe("library");
     expect(store.map.get(STORAGE_KEYS.library)).toBe(raw);
   });
 });

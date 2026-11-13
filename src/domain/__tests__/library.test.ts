@@ -18,7 +18,7 @@ describe("seed library", () => {
   it("includes all 23 reference entries verbatim", () => {
     expect(lib).toHaveLength(23);
     lib.forEach((i, idx) => {
-      const s = SEED_MALT_RECORDS[idx];
+      const s = SEED_MALT_RECORDS[idx]!;
       expect([i.name, i.category, i.origin, i.extractFraction, i.ppg, i.flavor, i.notes]).toEqual([
         s.name, s.category, s.origin, s.extractFraction, s.ppg, s.flavor, s.notes,
       ]);
@@ -45,7 +45,7 @@ describe("ingredient validation", () => {
     if (!r.ok) expect(r.errors.name).toMatch(/already exists/);
   });
   it("allows keeping the same name when editing that entry", () => {
-    const mo = lib[0];
+    const mo = lib[0]!;
     const r = validateIngredientDraft({ ...emptyIngredientDraft(), name: "Maris Otter", extractFraction: "0.8" }, lib, mo.id);
     expect(r.ok).toBe(true);
   });
@@ -73,14 +73,14 @@ describe("ingredient validation", () => {
 describe("ingredient snapshots", () => {
   it("library edits don't change saved recipe calculations, but are detected", () => {
     const lib = seedLibrary(NOW);
-    const mo = lib[0];
+    const mo = lib[0]!;
     const rows = [{ id: "r1", ingredient: snapshotIngredient(mo, NOW), lb: "6", oz: "" }];
     const before = calculateGrainBill(DEFAULT_CALC_SETTINGS, rows).totalPoints;
     const edited = lib.map((i) => (i.id === mo.id ? { ...i, extractFraction: 0.5, ppg: 23 } : i));
     const after = calculateGrainBill(DEFAULT_CALC_SETTINGS, rows).totalPoints;
     expect(after).toBe(before);
-    expect(snapshotState(rows[0].ingredient, lib)).toBe("current");
-    expect(snapshotState(rows[0].ingredient, edited)).toBe("library-changed");
-    expect(snapshotState(rows[0].ingredient, edited.filter((i) => i.id !== mo.id))).toBe("not-in-library");
+    expect(snapshotState(rows[0]!.ingredient!, lib)).toBe("current");
+    expect(snapshotState(rows[0]!.ingredient!, edited)).toBe("library-changed");
+    expect(snapshotState(rows[0]!.ingredient!, edited.filter((i) => i.id !== mo.id))).toBe("not-in-library");
   });
 });
