@@ -66,7 +66,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" aria-label="Open menu">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              aria-label="Open menu"
+              onClick={() => setOpen(true)}
+            >
               <Menu />
             </Button>
           </SheetTrigger>
