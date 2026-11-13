@@ -38,7 +38,7 @@ export interface ShellAccount {
   onSignOut: () => void | Promise<void>;
 }
 
-function SidebarFooter({ account }: { account?: ShellAccount }) {
+function SidebarFooter({ account }: { account?: ShellAccount | undefined }) {
   return (
     <div className="space-y-2 border-t border-sidebar-border px-4 py-4">
       <StorageStatus tone="dark" />
@@ -57,7 +57,7 @@ function SidebarFooter({ account }: { account?: ShellAccount }) {
   );
 }
 
-export function AppShell({ children, account }: { children: ReactNode; account?: ShellAccount }) {
+export function AppShell({ children, account }: { children: ReactNode; account?: ShellAccount | undefined }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background">

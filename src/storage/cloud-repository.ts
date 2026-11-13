@@ -29,6 +29,9 @@ function check<T>(res: { data: T; error: { message: string } | null }): T {
   if (res.error) throw new Error(res.error.message);
   return res.data;
 }
+function rows<T>(res: { data: T[] | null; error: { message: string } | null }): T[] {
+  return check(res) ?? [];
+}
 const stamp = () => new Date().toISOString();
 
 export class CloudBrewRepository implements BrewRepository {
@@ -84,7 +87,7 @@ export class CloudBrewRepository implements BrewRepository {
       // it, and seed ids are deterministic so a retried seed never duplicates.
       check(await this.client.from("brew_account_state").upsert({ owner_id: uid }, { onConflict: "owner_id", ignoreDuplicates: true }));
       const state = check(await this.client.from("brew_account_state").select("library_seeded_at").eq("owner_id", uid).single());
-      if (!state.library_seeded_at) {
+      if (!state?.library_seeded_at) {
         check(await this.client.from("brew_ingredients").upsert(this.seedRows(), { onConflict: "owner_id,id", ignoreDuplicates: true }));
         check(await this.client.from("brew_account_state").update({ library_seeded_at: stamp() }).eq("owner_id", uid));
       }
@@ -95,12 +98,12 @@ export class CloudBrewRepository implements BrewRepository {
         this.client.from("brew_drafts").select("doc,schema_version").eq("owner_id", uid),
       ]);
       const issues: SectionIssue[] = [];
-      const recipes = this.parseRows<Recipe>("recipes", check(r), recipeSchema, issues);
-      const library = this.parseRows<Ingredient>("library", check(l), ingredientSchema, issues).sort((a, b) => a.name.localeCompare(b.name));
+      const recipes = this.parseRows<Recipe>("recipes", rows(r), recipeSchema, issues);
+      const library = this.parseRows<Ingredient>("library", rows(l), ingredientSchema, issues).sort((a, b) => a.name.localeCompare(b.name));
       const settingsRow = check(s);
       this.hasSettings = !!settingsRow;
       const settings = (settingsRow && this.parseRows<AppSettings>("settings", [settingsRow], appSettingsSchema, issues)[0]) || defaultSettings();
-      const drafts = this.parseRows<CalculatorDraft>("drafts", check(d), calculatorDraftSchema, issues);
+      const drafts = this.parseRows<CalculatorDraft>("drafts", rows(d), calculatorDraftSchema, issues);
       return { recipes, library, settings, drafts, issues };
     });
   }
@@ -134,7 +137,7 @@ export class CloudBrewRepository implements BrewRepository {
   replaceLibrary(list: Ingredient[]) {
     return this.serial(async () => {
       this.guard("library");
-      const existing = check(await this.client.from("brew_ingredients").select("id").eq("owner_id", this.userId));
+      const existing = rows(await this.client.from("brew_ingredients").select("id").eq("owner_id", this.userId));
       const keep = new Set(list.map((i) => i.id));
       const remove = existing.map((e) => e.id).filter((id) => !keep.has(id));
       if (list.length) check(await this.client.from("brew_ingredients").upsert(list.map((i) => ({ owner_id: this.userId, id: i.id, doc: i as Json, schema_version: SCHEMA_VERSION, updated_at: stamp() })), { onConflict: "owner_id,id" }));
