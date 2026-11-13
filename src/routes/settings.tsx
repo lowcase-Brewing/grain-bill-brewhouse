@@ -51,7 +51,7 @@ function Body() {
     <div className="space-y-6">
       <Panel title="Where your data lives">
         <div className="space-y-3 text-sm">
-          <p className="flex flex-wrap items-center gap-2"><Badge variant="success">Saved in this browser</Badge> {repositoryDescription}</p>
+          <div className="flex flex-wrap items-center gap-2"><Badge variant="success">Saved in this browser</Badge> {repositoryDescription}</div>
           <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
             <li>Recipes, calculator drafts, malt library edits and these settings stay in this browser only. Nothing is sent to a server or shared database.</li>
             <li>Another browser or device won't see them. Clearing site data deletes them — download a backup or export recipes to keep copies.</li>
@@ -114,7 +114,7 @@ function Body() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="wf-recipe-folder">Recipe exports go in</Label>
-              <Select value={t.folders.includes(t.recipeFolder) ? t.recipeFolder : undefined} onValueChange={(v) => setT({ ...t, recipeFolder: v })}>
+              <Select value={t.folders.includes(t.recipeFolder) ? t.recipeFolder : ""} onValueChange={(v) => setT({ ...t, recipeFolder: v })}>
                 <SelectTrigger id="wf-recipe-folder"><SelectValue placeholder="Choose folder" /></SelectTrigger>
                 <SelectContent>{t.folders.filter((f) => f.trim()).map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
               </Select>

@@ -47,7 +47,7 @@ function RecipeGrainBill({ recipe }: { recipe: Recipe }) {
     () => ({ settings: parametersToSettingsInput(recipe.parameters), rows: recipe.grainBill, loadedExample: false }),
     [recipe],
   );
-  const { state, setState, result, dirty } = useGrainBillWork(`recipe:${recipe.id}`, recipe.id, baseline);
+  const { state, setState, resetWork, result, dirty } = useGrainBillWork(`recipe:${recipe.id}`, recipe.id, baseline);
 
   const save = async () => {
     const params = settingsToParameters(state.settings);
@@ -58,7 +58,7 @@ function RecipeGrainBill({ recipe }: { recipe: Recipe }) {
     const rows = state.rows.filter((r) => r.ingredient || r.lb.trim() || r.oz.trim());
     const next = applyGrainBillToRecipe(recipe, params.value, rows, result, nowIso());
     if (await actions.saveRecipe(next)) {
-      setState({ settings: parametersToSettingsInput(params.value), rows, loadedExample: false });
+      resetWork({ settings: parametersToSettingsInput(params.value), rows, loadedExample: false });
       if (next.grainBillSummary?.complete) toast.success("Grain bill saved to recipe");
       else toast.warning("Saved — OG not recorded", { description: next.grainBillSummary?.reason ?? undefined });
     }
@@ -78,7 +78,7 @@ function RecipeGrainBill({ recipe }: { recipe: Recipe }) {
               title="Discard unsaved grain bill changes?"
               description="The calculator goes back to what's saved on the recipe."
               confirmLabel="Discard"
-              onConfirm={() => setState(baseline)}
+              onConfirm={() => resetWork(baseline)}
             />
           </>
         }

@@ -32,7 +32,10 @@ function RecipesPage() {
   const navigate = useNavigate();
   const onImport = async (file: File) => {
     const parsed = parseRecipeExport(await file.text());
-    if (!parsed.ok) return toast.error("Couldn't import", { description: parsed.error });
+    if (!parsed.ok) {
+      toast.error("Couldn't import", { description: parsed.error });
+      return;
+    }
     const r = await actions.importRecipe(parsed.recipe);
     if (r) {
       toast.success(`Imported “${r.name}”`);

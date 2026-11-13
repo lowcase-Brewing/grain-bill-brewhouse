@@ -47,7 +47,7 @@ describe("sheet parity — reference example", () => {
     expect(r.differencePoints).toBeCloseTo(X.differencePoints, 10);
   });
   it("matches ingredient percentages of total bill (extract included)", () => {
-    r.rows.forEach((row, i) => expect(row.percentOfBill).toBeCloseTo(X.percentages[i], 5));
+    r.rows.forEach((row, i) => expect(row.percentOfBill).toBeCloseTo(X.percentages[i]!, 5));
   });
   it("displays OG 1.060 and delta +8.3", () => {
     expect(formatOG(r.estimatedOG!)).toBe("1.060");
@@ -160,15 +160,75 @@ describe("settings validation", () => {
     expect(r.differencePoints).toBeNull();
     expect(r.differenceReason).toMatch(/No target/);
   });
-  it.each([["1.000"], ["1.301"], ["0.9"], ["abc"]])("invalid target %s suppresses only the difference", (t) => {
+  it.each([["1.000"], ["1.301"], ["0.9"], ["abc"]])("invalid entered target %s suppresses aggregate OG and difference", (t) => {
     const r = calculateGrainBill(S({ targetOG: t }), [row("Maris Otter", "6")]);
-    expect(r.estimatedOG).not.toBeNull();
+    expect(r.estimatedOG).toBeNull();
+    expect(r.totalPoints).toBeNull();
     expect(r.differencePoints).toBeNull();
     expect(r.settings.targetOG.error).toBeTruthy();
+    expect(r.ogSuppressedReason).toMatch(/Target OG/);
+    expect(r.blockingSettingErrors.map((e) => e.field)).toContain("targetOG");
   });
   it("target of exactly 1.300 is accepted; negative difference is signed", () => {
     const r = calculateGrainBill(S({ targetOG: "1.3" }), [row("Maris Otter", "6")]);
     expect(r.differencePoints!).toBeLessThan(0);
     expect(formatSignedPoints(r.differencePoints!)).toMatch(/^−/);
+  });
+  it.each([["0"], [""], ["abc"]])("source A8 validates efficiency %s even for an extract-only bill", (efficiencyPct) => {
+    const r = calculateGrainBill(S({ efficiencyPct }), [row(DME, "4")]);
+    expect(r.estimatedOG).toBeNull();
+    expect(r.totalPoints).toBeNull();
+    expect(r.differencePoints).toBeNull();
+    expect(r.ogSuppressedReason).toMatch(/efficiency/i);
+    expect(r.blockingSettingErrors.map((e) => e.field)).toContain("efficiencyPct");
+  });
+});
+
+describe("finite-input overflow protection", () => {
+  it("marks an extreme finite row weight invalid instead of returning infinite points", () => {
+    const r = calculateGrainBill(S({ coldFermenterGal: "1" }), [row("Maris Otter", "1e308")]);
+    expect(r.rows[0]!.status).toBe("invalid");
+    expect(r.rows[0]!.errors.join(" ")).toMatch(/too large/);
+    expect(r.rows[0]!.ogPoints).toBeNull();
+    expect(r.totalPoints).toBeNull();
+    expect(r.estimatedOG).toBeNull();
+    expect(r.differencePoints).toBeNull();
+  });
+  it("handles a tiny volume without exposing Infinity or NaN", () => {
+    const r = calculateGrainBill(S({ coldFermenterGal: "1e-320" }), [row("Maris Otter", "6")]);
+    expect(r.rows[0]!.status).toBe("invalid");
+    expect(r.rows[0]!.ogPoints).toBeNull();
+    expect(r.totalPoints).toBeNull();
+    expect(r.estimatedOG).toBeNull();
+    expect(r.ogSuppressedReason).toMatch(/needs attention/);
+  });
+  it("suppresses bill totals when individually finite weights overflow their sum", () => {
+    const lowPpg = (name: string): GrainRowInput => ({
+      ...row(name, "1e308"),
+      ingredient: { ...snapshotIngredient(ing(name), NOW), ppg: 1 },
+    });
+    const r = calculateGrainBill(
+      S({ coldFermenterGal: "1e308", efficiencyPct: "1e-300" }),
+      [lowPpg("Maris Otter"), lowPpg("Vienna Malt")],
+    );
+    expect(r.invalidRowCount).toBe(0);
+    expect(r.totalWeightLb).toBeNull();
+    expect(r.mashedGrainLb).toBeNull();
+    expect(r.extractWeightLb).toBeNull();
+    expect(r.rows.every((x) => x.percentOfBill === null)).toBe(true);
+    expect(r.totalPoints).toBeNull();
+    expect(r.estimatedOG).toBeNull();
+    expect(r.ogSuppressedReason).toMatch(/weight is too large/);
+  });
+  it("suppresses aggregate points when finite row points overflow their sum", () => {
+    const rows = Array.from({ length: 6 }, () => row("Maris Otter", "1"));
+    const r = calculateGrainBill(S({ coldFermenterGal: "1e-306", efficiencyPct: "100" }), rows);
+    expect(r.invalidRowCount).toBe(0);
+    expect(r.rows.every((x) => x.ogPoints !== null && Number.isFinite(x.ogPoints))).toBe(true);
+    expect(r.totalWeightLb).toBe(6);
+    expect(r.totalPoints).toBeNull();
+    expect(r.estimatedOG).toBeNull();
+    expect(r.differencePoints).toBeNull();
+    expect(r.ogSuppressedReason).toMatch(/Total gravity points are too large/);
   });
 });
