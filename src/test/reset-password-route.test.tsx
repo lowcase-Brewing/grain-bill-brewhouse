@@ -15,10 +15,7 @@ async function renderResetPassword(search: string) {
     history: createMemoryHistory({ initialEntries: [`/reset-password${search}`] }),
   });
   await router.load();
-  const result = render(<RouterProvider router={router} />);
-  // eslint-disable-next-line no-console
-  console.log("HTML:", result.container.innerHTML.slice(0, 600), "| body:", document.body.innerHTML.slice(0, 600));
-  return result;
+  return render(<RouterProvider router={router} />);
 }
 
 describe("Reset password link errors", () => {
