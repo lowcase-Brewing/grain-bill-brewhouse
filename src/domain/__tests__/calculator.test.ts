@@ -160,11 +160,14 @@ describe("settings validation", () => {
     expect(r.differencePoints).toBeNull();
     expect(r.differenceReason).toMatch(/No target/);
   });
-  it.each([["1.000"], ["1.301"], ["0.9"], ["abc"]])("invalid target %s suppresses only the difference", (t) => {
+  it.each([["1.000"], ["1.301"], ["0.9"], ["abc"]])("invalid entered target %s suppresses aggregate OG and difference", (t) => {
     const r = calculateGrainBill(S({ targetOG: t }), [row("Maris Otter", "6")]);
-    expect(r.estimatedOG).not.toBeNull();
+    expect(r.estimatedOG).toBeNull();
+    expect(r.totalPoints).toBeNull();
     expect(r.differencePoints).toBeNull();
     expect(r.settings.targetOG.error).toBeTruthy();
+    expect(r.ogSuppressedReason).toMatch(/Target OG/);
+    expect(r.blockingSettingErrors.map((e) => e.field)).toContain("targetOG");
   });
   it("target of exactly 1.300 is accepted; negative difference is signed", () => {
     const r = calculateGrainBill(S({ targetOG: "1.3" }), [row("Maris Otter", "6")]);

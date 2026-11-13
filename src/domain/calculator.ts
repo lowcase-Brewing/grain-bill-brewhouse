@@ -228,20 +228,24 @@ export function calculateGrainBill(
   });
 
   const active = rows.filter((r) => r.status !== "blank");
-  const invalid = active.filter((r) => r.status === "invalid");
   const usesExtract = active.some((r) => r.isExtract);
   const usesGrain = active.some((r) => r.category !== null && !r.isExtract);
 
+  // Source Grain Bill A8 readiness: efficiency is always required, even for an
+  // extract-only bill. An entered invalid target also blocks the aggregate OG;
+  // a blank target is allowed and only leaves the delta blank.
   const blockingSettingErrors: GrainBillResult["blockingSettingErrors"] = [];
   if (settings.coldFermenterGal.error)
     blockingSettingErrors.push({ field: "coldFermenterGal", message: settings.coldFermenterGal.error });
-  if (usesGrain && settings.efficiencyPct.error)
+  if (settings.efficiencyPct.error)
     blockingSettingErrors.push({ field: "efficiencyPct", message: settings.efficiencyPct.error });
   if (usesExtract && settings.extractRecoveryPct.error)
     blockingSettingErrors.push({
       field: "extractRecoveryPct",
       message: settings.extractRecoveryPct.error,
     });
+  if (settings.targetOG.error)
+    blockingSettingErrors.push({ field: "targetOG", message: settings.targetOG.error });
 
   // Per-row points for valid rows when their own factor and the volume are valid.
   for (const r of rows) {

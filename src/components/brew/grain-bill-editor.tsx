@@ -81,8 +81,7 @@ export function SettingsInputs({
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {SETTING_FIELDS.map(({ field, label, unit, hint }) => {
         const check: FieldCheck = result.settings[field];
-        const relevant =
-          field === "extractRecoveryPct" ? result.usesExtract : field === "efficiencyPct" ? result.usesGrain || !check.blank : true;
+        const relevant = field === "extractRecoveryPct" ? result.usesExtract : true;
         const showError = check.error && (relevant || !check.blank);
         const id = `setting-${field}`;
         return (

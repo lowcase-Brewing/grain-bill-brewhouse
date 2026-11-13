@@ -28,3 +28,13 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## lowcase Brewing architecture
+
+- Keep calculator, recipe, library, workflow, and export rules in pure modules under `src/domain/`; this preserves formula parity and makes storage or UI changes independently testable.
+- UI code accesses persistence only through `BrewRepository`; this keeps the current browser-local implementation replaceable by authenticated per-user storage without rewriting screens.
+- Use `LocalBrewRepository` with versioned, validated storage envelopes and preserve unreadable sections until explicit reset; this prevents silent data loss and prepares schema evolution.
+- Store ingredient snapshots inside grain-bill rows; this keeps saved recipe calculations stable when the malt library changes.
+- Keep browser storage access behind the hydrated store provider; TanStack Start SSR must not read browser-only state.
+- Keep JSON, Markdown, and manifest exports client-generated; no server, cloud sync, Finder, Drive, or AppleScript automation is active.
+- Run focused Vitest coverage for numeric parity, validation, snapshots, storage, and exports whenever those rules change.
