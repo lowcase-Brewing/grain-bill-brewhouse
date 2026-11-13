@@ -7,6 +7,9 @@ import { Label } from "@/components/ui/label";
 import { AuthCard } from "@/components/brew/auth-card";
 import { supabase } from "@/integrations/supabase/client";
 import { takePasswordSetupCallback } from "@/lib/auth-callback";
+import { formatLinkError } from "@/lib/link-error";
+
+const MISSING_LINK_TEXT = "The link is missing, expired, or was already used.";
 
 const search = z.object({ mode: z.enum(["invite", "recovery"]).optional(), error: z.string().optional() });
 
@@ -55,7 +58,7 @@ function ResetPasswordPage() {
 
   if (linkError || phase === "missing") {
     return (
-      <AuthCard title="This link can't be used" description={linkError ? decodeURIComponent(linkError.replace(/\+/g, " ")) : "The link is missing, expired, or was already used."}>
+      <AuthCard title="This link can't be used" description={formatLinkError(linkError, MISSING_LINK_TEXT)}>
         <p className="text-sm text-muted-foreground">{mode === "invite" ? "Ask the owner to send a fresh invitation." : "Request a new reset link from the sign-in page."}</p>
         <Button asChild className="mt-4 w-full"><Link to="/auth">Go to sign in</Link></Button>
       </AuthCard>
