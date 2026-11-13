@@ -323,3 +323,39 @@ export function ResultsPanel({ result, children }: { result: GrainBillResult; ch
     </section>
   );
 }
+
+export function GrainBillWorkspace({
+  state,
+  setState,
+  result,
+  library,
+  banner,
+  resultsFooter,
+}: {
+  state: EditorState;
+  setState: (s: EditorState) => void;
+  result: GrainBillResult;
+  library: Ingredient[];
+  banner?: ReactNode;
+  resultsFooter?: ReactNode;
+}) {
+  return (
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="min-w-0 space-y-6">
+        {banner}
+        <Panel title="Settings">
+          <SettingsInputs settings={state.settings} result={result} onChange={(settings) => setState({ ...state, settings })} />
+        </Panel>
+        <Panel
+          title="Grain bill"
+          description="Enter pounds, extra ounces, or both — ounces can be 16 or more. Blank rows are ignored."
+        >
+          <RowsEditor rows={state.rows} result={result} library={library} onChange={(rows) => setState({ ...state, rows })} />
+        </Panel>
+      </div>
+      <div className="xl:sticky xl:top-8 xl:self-start">
+        <ResultsPanel result={result}>{resultsFooter}</ResultsPanel>
+      </div>
+    </div>
+  );
+}

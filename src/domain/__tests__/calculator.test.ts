@@ -37,9 +37,11 @@ describe("sheet parity — reference example", () => {
     expect(r.totalPoints).toBeCloseTo(X.totalPoints, 12);
     expect(r.estimatedOG).toBeCloseTo(X.estimatedOG, 14);
   });
-  it("equals exact rational arithmetic 391.908 / 6.5 (differs from the brief's 60.28523…)", () => {
-    expect(r.totalPoints).toBeCloseTo(391.908 / 6.5, 12);
-    expect(Math.abs(r.totalPoints! - X.briefStatedPoints)).toBeGreaterThan(0.008);
+  it("equals the authoritative recomputation (6*36.57*.70 + 36.8*.70 + 2*36.11*.70 + 4*45*.90)/6.5", () => {
+    expect(r.totalPoints).toBeCloseTo((6 * 36.57 * 0.7 + 1 * 36.8 * 0.7 + 2 * 36.11 * 0.7 + 4 * 45 * 0.9) / 6.5, 12);
+    expect(r.totalPoints).toBeCloseTo(60.29353846153846, 12);
+    expect(r.estimatedOG).toBeCloseTo(1.0602935384615384, 14);
+    expect(r.differencePoints).toBeCloseTo(8.29353846153846, 10);
   });
   it("matches signed target difference", () => {
     expect(r.differencePoints).toBeCloseTo(X.differencePoints, 10);
@@ -52,8 +54,8 @@ describe("sheet parity — reference example", () => {
     expect(formatSignedPoints(r.differencePoints!)).toBe("+8.3");
   });
   it("row points follow WeightLb*PPG*factor/volume", () => {
-    expect(r.rows[0].ogPoints).toBe((6 * 36.57 * 0.7) / 6.5);
-    expect(r.rows[3].ogPoints).toBe((4 * 45 * 0.9) / 6.5);
+    expect(r.rows[0]!.ogPoints).toBe((6 * 36.57 * 0.7) / 6.5);
+    expect(r.rows[3]!.ogPoints).toBe((4 * 45 * 0.9) / 6.5);
   });
 });
 
@@ -80,17 +82,17 @@ describe("grain vs extract treatment", () => {
 describe("weights", () => {
   it("accepts ounces-only rows", () => {
     const r = calculateGrainBill(S(), [row("Maris Otter", "", "8")]);
-    expect(r.rows[0].weightLb).toBe(0.5);
+    expect(r.rows[0]!.weightLb).toBe(0.5);
     expect(r.estimatedOG).not.toBeNull();
   });
   it("allows ounces of 16 or more", () => {
     const r = calculateGrainBill(S(), [row("Maris Otter", "1", "24")]);
-    expect(r.rows[0].weightLb).toBe(2.5);
-    expect(r.rows[0].status).toBe("valid");
+    expect(r.rows[0]!.weightLb).toBe(2.5);
+    expect(r.rows[0]!.status).toBe("valid");
   });
   it.each([["-1"], ["abc"], ["Infinity"], ["1e400"], ["NaN"], ["1,5"]])("rejects lb %s without coercing to zero", (lb) => {
     const r = calculateGrainBill(S(), [row("Maris Otter", "5"), row("Vienna Malt", lb)]);
-    expect(r.rows[1].status).toBe("invalid");
+    expect(r.rows[1]!.status).toBe("invalid");
     expect(r.estimatedOG).toBeNull();
     expect(r.totalPoints).toBeNull();
     expect(r.differencePoints).toBeNull();
@@ -98,20 +100,20 @@ describe("weights", () => {
     expect(r.ogSuppressedReason).toMatch(/1 row needs attention/);
   });
   it("selected ingredient with zero or missing weight is invalid", () => {
-    expect(calculateGrainBill(S(), [row("Maris Otter", "0", "0")]).rows[0].status).toBe("invalid");
+    expect(calculateGrainBill(S(), [row("Maris Otter", "0", "0")]).rows[0]!.status).toBe("invalid");
     const missing = calculateGrainBill(S(), [row("Maris Otter", "", "")]);
-    expect(missing.rows[0].status).toBe("invalid");
+    expect(missing.rows[0]!.status).toBe("invalid");
     expect(missing.estimatedOG).toBeNull();
   });
   it("weight without an ingredient is invalid", () => {
     const r = calculateGrainBill(S(), [row(null, "2")]);
-    expect(r.rows[0].errors[0]).toMatch(/Choose an ingredient/);
+    expect(r.rows[0]!.errors[0]).toMatch(/Choose an ingredient/);
     expect(r.estimatedOG).toBeNull();
   });
   it("ignores fully blank rows", () => {
     const r = calculateGrainBill(S(), [row("Maris Otter", "6"), row(null, "", ""), row(null, "  ", "")]);
     expect(r.activeRowCount).toBe(1);
-    expect(r.rows[1].status).toBe("blank");
+    expect(r.rows[1]!.status).toBe("blank");
     expect(r.estimatedOG).toBeCloseTo(1 + (6 * 36.57 * 0.7) / 6.5 / 1000, 14);
   });
   it("no rows → no OG with a reason", () => {
@@ -122,7 +124,7 @@ describe("weights", () => {
   it("ingredient snapshot with zero PPG is invalid for calculations", () => {
     const bad: GrainRowInput = { ...row(DME, "1"), ingredient: { ...snapshotIngredient(ing(DME), NOW), ppg: 0 } };
     const r = calculateGrainBill(S(), [bad]);
-    expect(r.rows[0].status).toBe("invalid");
+    expect(r.rows[0]!.status).toBe("invalid");
     expect(r.estimatedOG).toBeNull();
   });
 });
@@ -131,7 +133,7 @@ describe("settings validation", () => {
   it.each([["0"], ["-6"], [""], ["x"]])("invalid volume %s suppresses OG", (v) => {
     const r = calculateGrainBill(S({ coldFermenterGal: v }), [row("Maris Otter", "6")]);
     expect(r.estimatedOG).toBeNull();
-    expect(r.rows[0].ogPoints).toBeNull();
+    expect(r.rows[0]!.ogPoints).toBeNull();
     expect(r.blockingSettingErrors.map((e) => e.field)).toContain("coldFermenterGal");
     expect(r.totalWeightLb).toBe(6); // weights don't depend on volume
   });

@@ -8,19 +8,15 @@ import { SEED_MALT_RECORDS } from "./seed-malts";
 import type { CalcSettingsInput, GrainRowInput } from "./types";
 
 /**
- * Expected values from exact rational arithmetic of the sheet formulas with the
- * stated inputs. The project brief listed 60.28523076923076 points /
- * OG 1.0602852307692308 / +8.28523076923076; the formula with these inputs gives
- * 391.908 / 6.5 = 60.29353846153846 (a 0.0083-point difference). Both display as
- * OG 1.060 and +8.3. See README "Reference example".
+ * Exact parity fixture: (6*36.57*.70 + 1*36.8*.70 + 2*36.11*.70 + 4*45*.90) / 6.5.
+ * Displayed as OG 1.060 and +8.3.
  */
 export const REFERENCE_EXAMPLE_EXPECTED = {
   totalWeightLb: 13,
   mashedGrainLb: 9,
   totalPoints: 60.29353846153846,
   estimatedOG: 1.0602935384615384,
-  differencePoints: 8.293538461538462,
-  briefStatedPoints: 60.28523076923076,
+  differencePoints: 8.29353846153846,
   percentages: [46.153846, 7.692308, 15.384615, 30.769231],
   displayOG: "1.060",
   displayDifference: "+8.3",

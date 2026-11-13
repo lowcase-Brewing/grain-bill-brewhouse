@@ -10,33 +10,129 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CalculatorRouteImport } from './routes/calculator'
+import { Route as MaltsRouteImport } from './routes/malts'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as RecipesIndexRouteImport } from './routes/recipes.index'
+import { Route as RecipesNewRouteImport } from './routes/recipes.new'
+import { Route as RecipesRecipeIdIndexRouteImport } from './routes/recipes.$recipeId.index'
+import { Route as RecipesRecipeIdGrainBillRouteImport } from './routes/recipes.$recipeId.grain-bill'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalculatorRoute = CalculatorRouteImport.update({
+  id: '/calculator',
+  path: '/calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaltsRoute = MaltsRouteImport.update({
+  id: '/malts',
+  path: '/malts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecipesIndexRoute = RecipesIndexRouteImport.update({
+  id: '/recipes/',
+  path: '/recipes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecipesNewRoute = RecipesNewRouteImport.update({
+  id: '/recipes/new',
+  path: '/recipes/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecipesRecipeIdIndexRoute = RecipesRecipeIdIndexRouteImport.update({
+  id: '/recipes/$recipeId/',
+  path: '/recipes/$recipeId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecipesRecipeIdGrainBillRoute =
+  RecipesRecipeIdGrainBillRouteImport.update({
+    id: '/recipes/$recipeId/grain-bill',
+    path: '/recipes/$recipeId/grain-bill',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/calculator': typeof CalculatorRoute
+  '/malts': typeof MaltsRoute
+  '/settings': typeof SettingsRoute
+  '/recipes/new': typeof RecipesNewRoute
+  '/recipes/': typeof RecipesIndexRoute
+  '/recipes/$recipeId/grain-bill': typeof RecipesRecipeIdGrainBillRoute
+  '/recipes/$recipeId/': typeof RecipesRecipeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/calculator': typeof CalculatorRoute
+  '/malts': typeof MaltsRoute
+  '/settings': typeof SettingsRoute
+  '/recipes/new': typeof RecipesNewRoute
+  '/recipes': typeof RecipesIndexRoute
+  '/recipes/$recipeId/grain-bill': typeof RecipesRecipeIdGrainBillRoute
+  '/recipes/$recipeId': typeof RecipesRecipeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/calculator': typeof CalculatorRoute
+  '/malts': typeof MaltsRoute
+  '/settings': typeof SettingsRoute
+  '/recipes/new': typeof RecipesNewRoute
+  '/recipes/': typeof RecipesIndexRoute
+  '/recipes/$recipeId/grain-bill': typeof RecipesRecipeIdGrainBillRoute
+  '/recipes/$recipeId/': typeof RecipesRecipeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/calculator'
+    | '/malts'
+    | '/settings'
+    | '/recipes/new'
+    | '/recipes/'
+    | '/recipes/$recipeId/grain-bill'
+    | '/recipes/$recipeId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/calculator'
+    | '/malts'
+    | '/settings'
+    | '/recipes/new'
+    | '/recipes'
+    | '/recipes/$recipeId/grain-bill'
+    | '/recipes/$recipeId'
+  id:
+    | '__root__'
+    | '/'
+    | '/calculator'
+    | '/malts'
+    | '/settings'
+    | '/recipes/new'
+    | '/recipes/'
+    | '/recipes/$recipeId/grain-bill'
+    | '/recipes/$recipeId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CalculatorRoute: typeof CalculatorRoute
+  MaltsRoute: typeof MaltsRoute
+  SettingsRoute: typeof SettingsRoute
+  RecipesNewRoute: typeof RecipesNewRoute
+  RecipesIndexRoute: typeof RecipesIndexRoute
+  RecipesRecipeIdGrainBillRoute: typeof RecipesRecipeIdGrainBillRoute
+  RecipesRecipeIdIndexRoute: typeof RecipesRecipeIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +144,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calculator': {
+      id: '/calculator'
+      path: '/calculator'
+      fullPath: '/calculator'
+      preLoaderRoute: typeof CalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/malts': {
+      id: '/malts'
+      path: '/malts'
+      fullPath: '/malts'
+      preLoaderRoute: typeof MaltsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipes/': {
+      id: '/recipes/'
+      path: '/recipes'
+      fullPath: '/recipes/'
+      preLoaderRoute: typeof RecipesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipes/new': {
+      id: '/recipes/new'
+      path: '/recipes/new'
+      fullPath: '/recipes/new'
+      preLoaderRoute: typeof RecipesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipes/$recipeId/': {
+      id: '/recipes/$recipeId/'
+      path: '/recipes/$recipeId'
+      fullPath: '/recipes/$recipeId/'
+      preLoaderRoute: typeof RecipesRecipeIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipes/$recipeId/grain-bill': {
+      id: '/recipes/$recipeId/grain-bill'
+      path: '/recipes/$recipeId/grain-bill'
+      fullPath: '/recipes/$recipeId/grain-bill'
+      preLoaderRoute: typeof RecipesRecipeIdGrainBillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CalculatorRoute: CalculatorRoute,
+  MaltsRoute: MaltsRoute,
+  SettingsRoute: SettingsRoute,
+  RecipesNewRoute: RecipesNewRoute,
+  RecipesIndexRoute: RecipesIndexRoute,
+  RecipesRecipeIdGrainBillRoute: RecipesRecipeIdGrainBillRoute,
+  RecipesRecipeIdIndexRoute: RecipesRecipeIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
