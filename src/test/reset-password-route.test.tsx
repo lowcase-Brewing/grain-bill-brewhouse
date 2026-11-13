@@ -33,7 +33,7 @@ describe("Reset password link errors", () => {
   });
 
   it("renders the error card for a link error whose text is a literal percent sign", async () => {
-    renderResetPassword("?mode=invite&error=%25");
+    await renderResetPassword("?mode=invite&error=%25");
 
     expect(await screen.findByText("This link can't be used")).toBeTruthy();
     expect(screen.getByText("%")).toBeTruthy();
@@ -42,7 +42,7 @@ describe("Reset password link errors", () => {
   });
 
   it("renders the error card for a normal expired recovery link message", async () => {
-    renderResetPassword("?mode=recovery&error=Link%20is%20expired%20or%20already%20used");
+    await renderResetPassword("?mode=recovery&error=Link%20is%20expired%20or%20already%20used");
 
     expect(await screen.findByText("This link can't be used")).toBeTruthy();
     expect(
