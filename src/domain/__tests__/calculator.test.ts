@@ -37,6 +37,10 @@ describe("sheet parity — reference example", () => {
     expect(r.totalPoints).toBeCloseTo(X.totalPoints, 12);
     expect(r.estimatedOG).toBeCloseTo(X.estimatedOG, 14);
   });
+  it("equals exact rational arithmetic 391.908 / 6.5 (differs from the brief's 60.28523…)", () => {
+    expect(r.totalPoints).toBeCloseTo(391.908 / 6.5, 12);
+    expect(Math.abs(r.totalPoints! - X.briefStatedPoints)).toBeGreaterThan(0.008);
+  });
   it("matches signed target difference", () => {
     expect(r.differencePoints).toBeCloseTo(X.differencePoints, 10);
   });

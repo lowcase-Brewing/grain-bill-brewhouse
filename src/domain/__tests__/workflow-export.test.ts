@@ -63,7 +63,7 @@ describe("recipe export roundtrip", () => {
     const obj = JSON.parse(text);
     expect(obj.format).toBe("lowcase-brewing.recipe-export");
     expect(obj.schemaVersion).toBe(1);
-    expect(obj.calculation.estimatedOG).toBeCloseTo(1.0602852307692308, 14);
+    expect(obj.calculation.estimatedOG).toBeCloseTo(1.0602935384615384, 14);
   });
   it("rejects malformed, foreign or future-version files", () => {
     expect(parseRecipeExport("{oops").ok).toBe(false);
