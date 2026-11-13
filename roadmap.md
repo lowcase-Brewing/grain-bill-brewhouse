@@ -1,6 +1,6 @@
 # QA roadmap
 
-- [ ] Reproduce and fix the root AppShell/Radix blank-screen runtime error; add a real shell render regression check and verify fresh desktop load plus mobile menu open/close.
+- [x] Investigate the root AppShell/Radix blank-screen report; verify fresh and hot-refresh renders, add a real shell regression check, and verify mobile menu open/close.
 
 - [x] Match source readiness: always validate efficiency; invalid entered target OG suppresses aggregate OG and delta.
 - [x] Reject non-finite row points, bill totals, aggregate points, and delta without displaying Infinity or NaN.
