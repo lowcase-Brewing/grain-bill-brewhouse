@@ -8,13 +8,17 @@ import { formatLinkError } from "@/lib/link-error";
 
 const MISSING_LINK_TEXT = "The link is missing, expired, or was already used.";
 
-function renderResetPassword(search: string) {
+async function renderResetPassword(search: string) {
   const router = createRouter({
     routeTree,
     context: { queryClient: new QueryClient() },
     history: createMemoryHistory({ initialEntries: [`/reset-password${search}`] }),
   });
-  return render(<RouterProvider router={router} />);
+  await router.load();
+  const result = render(<RouterProvider router={router} />);
+  // eslint-disable-next-line no-console
+  console.log("HTML:", result.container.innerHTML.slice(0, 600), "| body:", document.body.innerHTML.slice(0, 600));
+  return result;
 }
 
 describe("Reset password link errors", () => {
