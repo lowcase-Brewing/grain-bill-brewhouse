@@ -63,7 +63,7 @@ export function WhenStoreReady({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-export function FieldError({ message, id }: { message?: string | null | undefined; id?: string }) {
+export function FieldError({ message, id }: { message?: string | null | false | undefined; id?: string }) {
   if (!message) return null;
   return (
     <p id={id} className="text-xs text-destructive">

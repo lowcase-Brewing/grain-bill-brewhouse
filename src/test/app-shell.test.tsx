@@ -55,4 +55,29 @@ describe("Root application shell", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(screen.getByRole("heading", { name: "Dashboard test page" })).toBeVisible();
   });
+
+  it("reports unavailable storage instead of crashing when browser reads fail", async () => {
+    const original = Object.getOwnPropertyDescriptor(window, "localStorage")!;
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      value: {
+        getItem: () => {
+          throw new DOMException("Storage is blocked", "SecurityError");
+        },
+      },
+    });
+    try {
+      const router = createRouter({
+        routeTree: rootRoute.addChildren([indexRoute]),
+        context: { queryClient: new QueryClient() },
+        history: createMemoryHistory({ initialEntries: ["/"] }),
+      });
+      render(<RouterProvider router={router} />);
+
+      expect(await screen.findByRole("heading", { name: "Dashboard test page" })).toBeVisible();
+      expect((await screen.findAllByText("Browser storage unavailable")).length).toBeGreaterThan(0);
+    } finally {
+      Object.defineProperty(window, "localStorage", original);
+    }
+  });
 });

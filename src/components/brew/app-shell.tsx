@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen, Calculator, FlaskConical, LayoutDashboard, Menu, Settings2, Wheat } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Brand } from "./brand";
 import { StorageStatus } from "./storage-status";
@@ -75,6 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <SheetTitle className="text-sidebar-foreground">
                 <Brand />
               </SheetTitle>
+              <SheetDescription className="sr-only">Navigate the lowcase Brewing workbench.</SheetDescription>
             </SheetHeader>
             <div className="flex-1 px-3">
               <NavLinks onNavigate={() => setOpen(false)} />
