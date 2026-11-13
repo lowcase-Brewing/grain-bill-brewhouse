@@ -174,4 +174,57 @@ describe("settings validation", () => {
     expect(r.differencePoints!).toBeLessThan(0);
     expect(formatSignedPoints(r.differencePoints!)).toMatch(/^−/);
   });
+  it.each([["0"], [""], ["abc"]])("source A8 validates efficiency %s even for an extract-only bill", (efficiencyPct) => {
+    const r = calculateGrainBill(S({ efficiencyPct }), [row(DME, "4")]);
+    expect(r.estimatedOG).toBeNull();
+    expect(r.totalPoints).toBeNull();
+    expect(r.differencePoints).toBeNull();
+    expect(r.ogSuppressedReason).toMatch(/efficiency/i);
+    expect(r.blockingSettingErrors.map((e) => e.field)).toContain("efficiencyPct");
+  });
+});
+
+describe("finite-input overflow protection", () => {
+  it("marks an extreme finite row weight invalid instead of returning infinite points", () => {
+    const r = calculateGrainBill(S({ coldFermenterGal: "1" }), [row("Maris Otter", "1e308")]);
+    expect(r.rows[0]!.status).toBe("invalid");
+    expect(r.rows[0]!.errors.join(" ")).toMatch(/too large/);
+    expect(r.rows[0]!.ogPoints).toBeNull();
+    expect(r.totalPoints).toBeNull();
+    expect(r.estimatedOG).toBeNull();
+    expect(r.differencePoints).toBeNull();
+  });
+  it("handles a tiny volume without exposing Infinity or NaN", () => {
+    const r = calculateGrainBill(S({ coldFermenterGal: "1e-320" }), [row("Maris Otter", "6")]);
+    expect(r.rows[0]!.status).toBe("invalid");
+    expect(r.rows[0]!.ogPoints).toBeNull();
+    expect(r.totalPoints).toBeNull();
+    expect(r.estimatedOG).toBeNull();
+    expect(r.ogSuppressedReason).toMatch(/needs attention/);
+  });
+  it("suppresses bill totals when individually finite weights overflow their sum", () => {
+    const r = calculateGrainBill(
+      S({ coldFermenterGal: "1e308", efficiencyPct: "1e-300" }),
+      [row("Maris Otter", "1e308"), row("Vienna Malt", "1e308")],
+    );
+    expect(r.invalidRowCount).toBe(0);
+    expect(r.totalWeightLb).toBeNull();
+    expect(r.mashedGrainLb).toBeNull();
+    expect(r.extractWeightLb).toBeNull();
+    expect(r.rows.every((x) => x.percentOfBill === null)).toBe(true);
+    expect(r.totalPoints).toBeNull();
+    expect(r.estimatedOG).toBeNull();
+    expect(r.ogSuppressedReason).toMatch(/weight is too large/);
+  });
+  it("suppresses aggregate points when finite row points overflow their sum", () => {
+    const rows = Array.from({ length: 6 }, () => row("Maris Otter", "1"));
+    const r = calculateGrainBill(S({ coldFermenterGal: "1e-305", efficiencyPct: "1e-300" }), rows);
+    expect(r.invalidRowCount).toBe(0);
+    expect(r.rows.every((x) => x.ogPoints !== null && Number.isFinite(x.ogPoints))).toBe(true);
+    expect(r.totalWeightLb).toBe(6);
+    expect(r.totalPoints).toBeNull();
+    expect(r.estimatedOG).toBeNull();
+    expect(r.differencePoints).toBeNull();
+    expect(r.ogSuppressedReason).toMatch(/Total gravity points are too large/);
+  });
 });

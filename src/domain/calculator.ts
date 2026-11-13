@@ -248,6 +248,8 @@ export function calculateGrainBill(
     blockingSettingErrors.push({ field: "targetOG", message: settings.targetOG.error });
 
   // Per-row points for valid rows when their own factor and the volume are valid.
+  // Finite inputs can still overflow when multiplied or divided; never expose
+  // Infinity/NaN as a calculated result.
   for (const r of rows) {
     if (r.status !== "valid" || r.weightLb === null || r.ppg === null) continue;
     const factor = r.isExtract ? recovery : efficiency;
@@ -258,25 +260,43 @@ export function calculateGrainBill(
         ? "Needs a valid extract recovery %."
         : "Needs a valid brewhouse efficiency %.";
     } else {
-      r.ogPoints = (r.weightLb * r.ppg * factor) / volume;
+      const points = (r.weightLb * r.ppg * factor) / volume;
+      if (Number.isFinite(points)) {
+        r.ogPoints = points;
+      } else {
+        r.status = "invalid";
+        r.errors.push("Gravity points for this row are too large to calculate. Reduce the weight or increase the volume.");
+      }
     }
   }
+
+  const invalid = active.filter((r) => r.status === "invalid");
 
   let totalWeightLb: number | null = null;
   let mashedGrainLb: number | null = null;
   let extractWeightLb: number | null = null;
+  let totalWeightOverflow = false;
   if (active.length > 0 && invalid.length === 0) {
-    totalWeightLb = 0;
-    mashedGrainLb = 0;
-    extractWeightLb = 0;
+    let total = 0;
+    let mashed = 0;
+    let extract = 0;
     for (const r of active) {
       const w = r.weightLb as number;
-      totalWeightLb += w;
-      if (r.isExtract) extractWeightLb += w;
-      else mashedGrainLb += w;
+      total += w;
+      if (r.isExtract) extract += w;
+      else mashed += w;
+      if (!Number.isFinite(total) || !Number.isFinite(mashed) || !Number.isFinite(extract)) {
+        totalWeightOverflow = true;
+        break;
+      }
     }
-    for (const r of active) {
-      r.percentOfBill = ((r.weightLb as number) / totalWeightLb) * 100;
+    if (!totalWeightOverflow) {
+      totalWeightLb = total;
+      mashedGrainLb = mashed;
+      extractWeightLb = extract;
+      for (const r of active) {
+        r.percentOfBill = ((r.weightLb as number) / total) * 100;
+      }
     }
   }
 
@@ -289,10 +309,29 @@ export function calculateGrainBill(
     ogSuppressedReason = `${invalid.length} row${invalid.length === 1 ? " needs" : "s need"} attention before OG can be estimated.`;
   } else if (blockingSettingErrors.length > 0) {
     ogSuppressedReason = blockingSettingErrors.map((e) => e.message).join(" ");
+  } else if (totalWeightOverflow) {
+    ogSuppressedReason = "Total grain bill weight is too large to calculate. Reduce the row weights.";
   } else {
-    totalPoints = 0;
-    for (const r of active) totalPoints += r.ogPoints as number;
-    estimatedOG = 1 + totalPoints / 1000;
+    let points = 0;
+    let pointsOverflow = false;
+    for (const r of active) {
+      points += r.ogPoints as number;
+      if (!Number.isFinite(points)) {
+        pointsOverflow = true;
+        break;
+      }
+    }
+    if (pointsOverflow) {
+      ogSuppressedReason = "Total gravity points are too large to calculate. Reduce the row weights or increase the volume.";
+    } else {
+      const og = 1 + points / 1000;
+      if (Number.isFinite(og)) {
+        totalPoints = points;
+        estimatedOG = og;
+      } else {
+        ogSuppressedReason = "Estimated OG is too large to calculate. Reduce the row weights or increase the volume.";
+      }
+    }
   }
 
   let differencePoints: number | null = null;
@@ -304,7 +343,9 @@ export function calculateGrainBill(
   } else if (estimatedOG === null) {
     differenceReason = "Estimated OG unavailable.";
   } else {
-    differencePoints = (estimatedOG - (settings.targetOG.value as number)) * 1000;
+    const difference = (estimatedOG - (settings.targetOG.value as number)) * 1000;
+    if (Number.isFinite(difference)) differencePoints = difference;
+    else differenceReason = "Target difference is too large to calculate.";
   }
 
   return {
