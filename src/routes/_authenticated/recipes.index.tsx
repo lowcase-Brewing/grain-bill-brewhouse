@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/recipes/")({
       { title: "Recipes · lowcase Brewing" },
       { name: "description", content: "Search, edit, duplicate and export lowcase Brewing recipe drafts." },
       { property: "og:title", content: "Recipes · lowcase Brewing" },
-      { property: "og:description", content: "Recipe drafts saved in this browser." },
+      { property: "og:description", content: "Recipe drafts saved to your account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -47,7 +47,7 @@ function RecipesPage() {
       <PageHeader
         eyebrow="Library"
         title="Recipes"
-        description="Recipe drafts saved in this browser."
+        description="Recipe drafts saved to your account."
         actions={
           <>
             <Button asChild><Link to="/recipes/new"><Plus /> New recipe</Link></Button>
@@ -113,7 +113,7 @@ function RecipeList() {
                 <ConfirmButton
                   trigger={<Button variant="ghost" size="icon" aria-label={`Delete ${r.name}`} className="hover:text-destructive"><Trash2 /></Button>}
                   title={`Delete “${r.name}”?`}
-                  description="This removes the recipe and any unsaved calculator draft for it from this browser. Export it first if you want a copy."
+                  description="This removes the recipe and any unsaved calculator draft for it from your account. Export it first if you want a copy."
                   confirmLabel="Delete recipe"
                   onConfirm={async () => { if (await actions.deleteRecipe(r.id)) toast.success("Recipe deleted"); }}
                 />

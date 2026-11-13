@@ -9,6 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedCalculatorRouteImport } from './routes/_authenticated/calculator'
 import { Route as AuthenticatedMaltsRouteImport } from './routes/_authenticated/malts'
@@ -18,61 +21,79 @@ import { Route as AuthenticatedRecipesNewRouteImport } from './routes/_authentic
 import { Route as AuthenticatedRecipesRecipeIdIndexRouteImport } from './routes/_authenticated/recipes.$recipeId.index'
 import { Route as AuthenticatedRecipesRecipeIdGrainBillRouteImport } from './routes/_authenticated/recipes.$recipeId.grain-bill'
 
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
-  id: '/_authenticated/',
-  path: '/',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCalculatorRoute = AuthenticatedCalculatorRouteImport.update({
-  id: '/_authenticated/calculator',
+  id: '/calculator',
   path: '/calculator',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMaltsRoute = AuthenticatedMaltsRouteImport.update({
-  id: '/_authenticated/malts',
+  id: '/malts',
   path: '/malts',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/_authenticated/settings',
+  id: '/settings',
   path: '/settings',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRecipesIndexRoute =
   AuthenticatedRecipesIndexRouteImport.update({
-    id: '/_authenticated/recipes/',
+    id: '/recipes/',
     path: '/recipes/',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedRecipesNewRoute = AuthenticatedRecipesNewRouteImport.update({
-  id: '/_authenticated/recipes/new',
+  id: '/recipes/new',
   path: '/recipes/new',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRecipesRecipeIdIndexRoute =
   AuthenticatedRecipesRecipeIdIndexRouteImport.update({
-    id: '/_authenticated/recipes/$recipeId/',
+    id: '/recipes/$recipeId/',
     path: '/recipes/$recipeId/',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedRecipesRecipeIdGrainBillRoute =
   AuthenticatedRecipesRecipeIdGrainBillRouteImport.update({
-    id: '/_authenticated/recipes/$recipeId/grain-bill',
+    id: '/recipes/$recipeId/grain-bill',
     path: '/recipes/$recipeId/grain-bill',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof AuthenticatedIndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/calculator': typeof AuthenticatedCalculatorRoute
   '/malts': typeof AuthenticatedMaltsRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/': typeof AuthenticatedIndexRoute
   '/recipes/new': typeof AuthenticatedRecipesNewRoute
   '/recipes/': typeof AuthenticatedRecipesIndexRoute
   '/recipes/$recipeId/grain-bill': typeof AuthenticatedRecipesRecipeIdGrainBillRoute
   '/recipes/$recipeId/': typeof AuthenticatedRecipesRecipeIdIndexRoute
 }
 export interface FileRoutesByTo {
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/calculator': typeof AuthenticatedCalculatorRoute
   '/malts': typeof AuthenticatedMaltsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -84,6 +105,9 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/calculator': typeof AuthenticatedCalculatorRoute
   '/_authenticated/malts': typeof AuthenticatedMaltsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -96,16 +120,20 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
     | '/calculator'
     | '/malts'
     | '/settings'
-    | '/'
     | '/recipes/new'
     | '/recipes/'
     | '/recipes/$recipeId/grain-bill'
     | '/recipes/$recipeId/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/auth'
+    | '/reset-password'
     | '/calculator'
     | '/malts'
     | '/settings'
@@ -116,6 +144,9 @@ export interface FileRouteTypes {
     | '/recipes/$recipeId'
   id:
     | '__root__'
+    | '/_authenticated'
+    | '/auth'
+    | '/reset-password'
     | '/_authenticated/calculator'
     | '/_authenticated/malts'
     | '/_authenticated/settings'
@@ -127,6 +158,94 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/calculator': {
+      id: '/_authenticated/calculator'
+      path: '/calculator'
+      fullPath: '/calculator'
+      preLoaderRoute: typeof AuthenticatedCalculatorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/malts': {
+      id: '/_authenticated/malts'
+      path: '/malts'
+      fullPath: '/malts'
+      preLoaderRoute: typeof AuthenticatedMaltsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/recipes/': {
+      id: '/_authenticated/recipes/'
+      path: '/recipes'
+      fullPath: '/recipes/'
+      preLoaderRoute: typeof AuthenticatedRecipesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/recipes/new': {
+      id: '/_authenticated/recipes/new'
+      path: '/recipes/new'
+      fullPath: '/recipes/new'
+      preLoaderRoute: typeof AuthenticatedRecipesNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/recipes/$recipeId/': {
+      id: '/_authenticated/recipes/$recipeId/'
+      path: '/recipes/$recipeId'
+      fullPath: '/recipes/$recipeId/'
+      preLoaderRoute: typeof AuthenticatedRecipesRecipeIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/recipes/$recipeId/grain-bill': {
+      id: '/_authenticated/recipes/$recipeId/grain-bill'
+      path: '/recipes/$recipeId/grain-bill'
+      fullPath: '/recipes/$recipeId/grain-bill'
+      preLoaderRoute: typeof AuthenticatedRecipesRecipeIdGrainBillRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+  }
+}
+
+interface AuthenticatedRouteRouteChildren {
   AuthenticatedCalculatorRoute: typeof AuthenticatedCalculatorRoute
   AuthenticatedMaltsRoute: typeof AuthenticatedMaltsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -137,68 +256,7 @@ export interface RootRouteChildren {
   AuthenticatedRecipesRecipeIdIndexRoute: typeof AuthenticatedRecipesRecipeIdIndexRoute
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/_authenticated/': {
-      id: '/_authenticated/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/calculator': {
-      id: '/_authenticated/calculator'
-      path: '/calculator'
-      fullPath: '/calculator'
-      preLoaderRoute: typeof AuthenticatedCalculatorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/malts': {
-      id: '/_authenticated/malts'
-      path: '/malts'
-      fullPath: '/malts'
-      preLoaderRoute: typeof AuthenticatedMaltsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/recipes/': {
-      id: '/_authenticated/recipes/'
-      path: '/recipes'
-      fullPath: '/recipes/'
-      preLoaderRoute: typeof AuthenticatedRecipesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/recipes/new': {
-      id: '/_authenticated/recipes/new'
-      path: '/recipes/new'
-      fullPath: '/recipes/new'
-      preLoaderRoute: typeof AuthenticatedRecipesNewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/recipes/$recipeId/': {
-      id: '/_authenticated/recipes/$recipeId/'
-      path: '/recipes/$recipeId'
-      fullPath: '/recipes/$recipeId/'
-      preLoaderRoute: typeof AuthenticatedRecipesRecipeIdIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/recipes/$recipeId/grain-bill': {
-      id: '/_authenticated/recipes/$recipeId/grain-bill'
-      path: '/recipes/$recipeId/grain-bill'
-      fullPath: '/recipes/$recipeId/grain-bill'
-      preLoaderRoute: typeof AuthenticatedRecipesRecipeIdGrainBillRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
-}
-
-const rootRouteChildren: RootRouteChildren = {
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCalculatorRoute: AuthenticatedCalculatorRoute,
   AuthenticatedMaltsRoute: AuthenticatedMaltsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
@@ -209,6 +267,15 @@ const rootRouteChildren: RootRouteChildren = {
     AuthenticatedRecipesRecipeIdGrainBillRoute,
   AuthenticatedRecipesRecipeIdIndexRoute:
     AuthenticatedRecipesRecipeIdIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

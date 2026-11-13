@@ -57,7 +57,7 @@ function RecipeDetail() {
             <ConfirmButton
               trigger={<Button variant="outline" className="hover:text-destructive"><Trash2 /> Delete</Button>}
               title={`Delete “${recipe.name}”?`}
-              description="This removes the recipe and any unsaved calculator draft for it from this browser."
+              description="This removes the recipe and any unsaved calculator draft for it from your account."
               confirmLabel="Delete recipe"
               onConfirm={async () => { if (await actions.deleteRecipe(recipe.id)) { toast.success("Recipe deleted"); void navigate({ to: "/recipes" }); } }}
             />
@@ -74,7 +74,7 @@ function RecipeDetail() {
             if (await actions.saveRecipe(next)) {
               // Keep an open calculator draft consistent with the recipe's settings.
               if (draft) await actions.saveDraft({ ...draft, settings: parametersToSettingsInput(next.parameters), updatedAt: nowIso() });
-              toast.success("Recipe saved in this browser");
+              toast.success("Recipe saved to your account");
             }
           }}
         />

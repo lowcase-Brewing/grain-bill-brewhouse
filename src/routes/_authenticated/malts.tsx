@@ -131,7 +131,7 @@ function Library({ onEdit }: { onEdit: (i: Ingredient) => void }) {
                 description={
                   usedBy(i.id) > 0
                     ? `${usedBy(i.id)} saved recipe(s) use it. They keep their saved snapshot of its values.`
-                    : "It's removed from this browser's library. Seed entries can be restored from Settings."
+                    : "It's removed from your library. Seed entries can be restored from Settings."
                 }
                 confirmLabel="Delete"
                 onConfirm={async () => { if (await actions.deleteIngredient(i.id)) toast.success("Ingredient deleted"); }}

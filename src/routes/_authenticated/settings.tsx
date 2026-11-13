@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmButton } from "@/components/brew/confirm-button";
 import { PageHeader, Panel, WhenStoreReady } from "@/components/brew/page";
+import { LegacyImportPanel } from "@/components/brew/legacy-import";
 import { seedLibrary } from "@/domain/library";
 import type { WorkflowTemplate } from "@/domain/types";
 import { buildProjectManifest, PATTERN_TOKENS, PROPOSED_DEFAULT_WORKFLOW, validateWorkflowTemplate } from "@/domain/workflow";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: "Workflow & settings · lowcase Brewing" },
-      { name: "description", content: "Project folder template, exports and browser storage details for lowcase Brewing." },
+      { name: "description", content: "Project folder template, exports and account storage details for lowcase Brewing." },
       { property: "og:title", content: "Workflow & settings · lowcase Brewing" },
       { property: "og:description", content: "Folder template, exports and storage details." },
       { property: "og:type", content: "website" },
@@ -49,14 +50,15 @@ function Body() {
 
   return (
     <div className="space-y-6">
+      <LegacyImportPanel />
       <Panel title="Where your data lives">
         <div className="space-y-3 text-sm">
-          <div className="flex flex-wrap items-center gap-2"><Badge variant="success">Saved in this browser</Badge> {repositoryDescription}</div>
+          <div className="flex flex-wrap items-center gap-2"><Badge variant="success">Saved to your account</Badge> {repositoryDescription}</div>
           <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-            <li>Recipes, calculator drafts, malt library edits and these settings stay in this browser only. Nothing is sent to a server or shared database.</li>
-            <li>Another browser or device won't see them. Clearing site data deletes them — download a backup or export recipes to keep copies.</li>
-            <li>There is no login and no cloud sync yet. Signed-in, per-user cloud storage is planned, not active.</li>
-            <li>This Lovable project's editor is accessible to the workspace on the current plan (owner-only editor access needs Business/Enterprise). The app is unpublished. Brewing data you enter lives in your browser, not in the project.</li>
+            <li>Recipes, calculator drafts, malt library edits and these settings are saved to your signed-in account, so another browser or device signed in as you sees them.</li>
+            <li>Each account's data is private: the database only lets the signed-in owner read or change their own rows. Accounts are invite-only; public sign-up is off.</li>
+            <li>A change is shown as saved only after the cloud confirms it. If a save fails you'll see an error — download a backup to keep an offline copy.</li>
+            <li>This Lovable project's editor is accessible to the workspace on the current plan (owner-only editor access needs Business/Enterprise). The app is unpublished. AppleScript, Finder and Drive automation are not connected.</li>
           </ul>
           {data.issues.map((issue) => (
             <div key={issue.section} className="rounded-md border border-amber/40 bg-amber-soft p-3 text-amber-foreground">
@@ -69,7 +71,7 @@ function Body() {
             </div>
           ))}
           <div className="flex flex-wrap gap-2 pt-1">
-            <Button variant="outline" onClick={() => downloadText(JSON.stringify({ format: "lowcase-brewing.browser-backup", schemaVersion: 1, exportedAt: nowIso(), recipes: data.recipes, library: data.library, settings: data.settings, drafts: data.drafts }, null, 2) + "\n", `lowcase-backup-${nowIso().slice(0, 10)}.json`, "application/json")}>
+            <Button variant="outline" onClick={() => downloadText(JSON.stringify({ format: "lowcase-brewing.account-backup", schemaVersion: 1, exportedAt: nowIso(), recipes: data.recipes, library: data.library, settings: data.settings, drafts: data.drafts }, null, 2) + "\n", `lowcase-backup-${nowIso().slice(0, 10)}.json`, "application/json")}>
               <Download /> Download full backup (JSON)
             </Button>
             <ConfirmButton
