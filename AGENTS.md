@@ -32,9 +32,11 @@ use the editor.
 ## lowcase Brewing architecture
 
 - Keep calculator, recipe, library, workflow, and export rules in pure modules under `src/domain/`; this preserves formula parity and makes storage or UI changes independently testable.
-- UI code accesses persistence only through `BrewRepository`; this keeps the current browser-local implementation replaceable by authenticated per-user storage without rewriting screens.
+- UI code accesses persistence only through `BrewRepository`; signed-in screens use `CloudBrewRepository` bound to one user id, keeping storage swappable without rewriting screens.
+- Private routes live under `src/routes/_authenticated/`, whose layout keys `BrewStoreProvider` by user id; this discards prior-account state and late responses on sign-out or account switch.
+- Cloud tables store validated JSON documents per owner with owner-only RLS; legacy browser data imports only via explicit, non-overwriting `planLegacyImport`.
 - Use `LocalBrewRepository` with versioned, validated storage envelopes and preserve unreadable sections until explicit reset; this prevents silent data loss and prepares schema evolution.
 - Store ingredient snapshots inside grain-bill rows; this keeps saved recipe calculations stable when the malt library changes.
 - Keep browser storage access behind the hydrated store provider; TanStack Start SSR must not read browser-only state.
-- Keep JSON, Markdown, and manifest exports client-generated; no server, cloud sync, Finder, Drive, or AppleScript automation is active.
+- Keep JSON, Markdown, and manifest exports client-generated; no Finder, Drive, or AppleScript automation is active.
 - Run focused Vitest coverage for numeric parity, validation, snapshots, storage, and exports whenever those rules change.

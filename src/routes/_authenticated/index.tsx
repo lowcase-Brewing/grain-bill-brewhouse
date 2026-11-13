@@ -7,11 +7,11 @@ import { formatDate, formatOG } from "@/domain/format";
 import { BREW_METHOD_LABELS } from "@/domain/types";
 import { useBrewStore } from "@/storage/brew-store";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Dashboard · lowcase Brewing" },
-      { name: "description", content: "Recipe drafts and grain bill work for lowcase Brewing, saved in this browser." },
+      { name: "description", content: "Recipe drafts and grain bill work for lowcase Brewing, saved to your account." },
       { property: "og:title", content: "Dashboard · lowcase Brewing" },
       { property: "og:description", content: "Recipe drafts and grain bill work for lowcase Brewing." },
       { property: "og:type", content: "website" },
@@ -27,7 +27,7 @@ function Dashboard() {
       <PageHeader
         eyebrow="Workbench"
         title="What's on the mash tun?"
-        description="Recipes, grain bills and calculator drafts — all kept in this browser for now."
+        description="Recipes, grain bills and calculator drafts — saved privately to your account."
         actions={
           <>
             <Button asChild><Link to="/recipes/new"><Plus /> New recipe</Link></Button>

@@ -1,3 +1,4 @@
+import "@/lib/auth-callback";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -13,8 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { AppShell } from "@/components/brew/app-shell";
-import { BrewStoreProvider } from "@/storage/brew-store";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -122,15 +122,25 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        void router.navigate({ to: "/reset-password", search: { mode: "recovery" } });
+        return;
+      }
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      void router.invalidate();
+      if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
+    });
+    return () => data.subscription.unsubscribe();
+  }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrewStoreProvider>
-        <AppShell>
-          <Outlet />
-        </AppShell>
-        <Toaster position="top-right" />
-      </BrewStoreProvider>
+      <Outlet />
+      <Toaster position="top-right" />
     </QueryClientProvider>
   );
 }

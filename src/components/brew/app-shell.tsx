@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, Calculator, FlaskConical, LayoutDashboard, Menu, Settings2, Wheat } from "lucide-react";
+import { BookOpen, Calculator, FlaskConical, LayoutDashboard, LogOut, Menu, Settings2, Wheat } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -33,10 +33,23 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function SidebarFooter() {
+export interface ShellAccount {
+  email: string;
+  onSignOut: () => void | Promise<void>;
+}
+
+function SidebarFooter({ account }: { account?: ShellAccount | undefined }) {
   return (
     <div className="space-y-2 border-t border-sidebar-border px-4 py-4">
       <StorageStatus tone="dark" />
+      {account ? (
+        <div className="flex items-center justify-between gap-2">
+          <span className="truncate text-xs text-sidebar-foreground/80" title={account.email}>{account.email}</span>
+          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={() => void account.onSignOut()}>
+            <LogOut className="size-3.5" /> Sign out
+          </Button>
+        </div>
+      ) : null}
       <p className="flex items-center gap-1.5 text-[11px] leading-snug text-sidebar-muted">
         <FlaskConical className="size-3" aria-hidden /> Weslaco, Texas · private workbench
       </p>
@@ -44,7 +57,7 @@ function SidebarFooter() {
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, account }: { children: ReactNode; account?: ShellAccount | undefined }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background">
@@ -57,7 +70,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex-1 px-3">
           <NavLinks />
         </div>
-        <SidebarFooter />
+        <SidebarFooter account={account} />
       </aside>
 
       <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-sidebar-border bg-sidebar px-4 py-3 text-sidebar-foreground lg:hidden">
@@ -80,7 +93,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="flex-1 px-3">
               <NavLinks onNavigate={() => setOpen(false)} />
             </div>
-            <SidebarFooter />
+            <SidebarFooter account={account} />
           </SheetContent>
         </Sheet>
       </header>

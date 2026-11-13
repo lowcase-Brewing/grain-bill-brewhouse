@@ -11,7 +11,7 @@ import type { Recipe } from "@/domain/types";
 import { nowIso, useBrewStore } from "@/storage/brew-store";
 import { RecipeMissing } from "@/components/brew/recipe-missing";
 
-export const Route = createFileRoute("/recipes/$recipeId/grain-bill")({
+export const Route = createFileRoute("/_authenticated/recipes/$recipeId/grain-bill")({
   head: () => ({
     meta: [
       { title: "Recipe grain bill · lowcase Brewing" },
@@ -69,7 +69,7 @@ function RecipeGrainBill({ recipe }: { recipe: Recipe }) {
       <PageHeader
         eyebrow={<Link to="/recipes/$recipeId" params={{ recipeId: recipe.id }} className="hover:text-foreground">← {recipe.name}</Link>}
         title="Grain bill"
-        description={`${recipe.name} · ${recipe.style} · v${recipe.version}. Changes autosave as a draft in this browser until you save them to the recipe.`}
+        description={`${recipe.name} · ${recipe.style} · v${recipe.version}. Changes autosave as a draft in your account until you save them to the recipe.`}
         actions={
           <>
             <Button onClick={save} disabled={!dirty}><Save /> Save to recipe</Button>
@@ -88,7 +88,7 @@ function RecipeGrainBill({ recipe }: { recipe: Recipe }) {
         setState={setState}
         result={result}
         library={data?.library ?? []}
-        resultsFooter={<p>{dirty ? "Unsaved draft — autosaved in this browser." : "Matches the saved recipe."}</p>}
+        resultsFooter={<p>{dirty ? "Unsaved draft — autosaved to your account." : "Matches the saved recipe."}</p>}
       />
     </>
   );

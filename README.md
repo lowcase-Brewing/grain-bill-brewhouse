@@ -1,26 +1,35 @@
 # lowcase Brewing
 
-A private, local-first brewing workbench for lowcase Brewing in Weslaco, Texas. This is an unpublished functional MVP for recipe projects and grain bill calculations, not a marketing site.
+A private, invite-only brewing workbench for lowcase Brewing in Weslaco, Texas. This is an unpublished functional MVP for recipe projects and grain bill calculations, not a marketing site.
 
 ## What is implemented
 
-- Dashboard with real browser-saved recipe, saved-OG, draft, and library counts.
+- Invite-only email/password accounts: sign in, sign out, password reset and invitation password setup (with expired-link handling). No public sign-up.
+- Private per-account cloud saving of recipes, library, settings and drafts, plus an optional, reviewed import of older browser-only data.
+- Dashboard with real saved recipe, saved-OG, draft, and library counts.
 - Recipe creation, search, editing, duplication, deletion, and versioned JSON import.
 - Recipe fields for name, style, semantic version, brew method, gravity parameters, description, notes, hops, yeast, and process.
-- Shared standalone and recipe grain bill calculator with raw-input validation, per-row results, autosaved browser drafts, and save-back to a recipe.
+- Shared standalone and recipe grain bill calculator with raw-input validation, per-row results, autosaved drafts, and save-back to a recipe.
 - A 23-entry editable malt, adjunct, and extract library seeded from the source sheet. Saved rows retain ingredient numeric snapshots when the library changes.
 - Client-side recipe JSON, readable Markdown, and planned-project manifest downloads, with sanitized file and path components.
 - Editable proposed folder template and preview in Settings.
-- Full browser-data backup download, raw download of unreadable storage sections, explicit section reset, and seed-library restoration.
+- Full account backup download, raw download of unreadable storage sections, explicit section reset, and seed-library restoration.
 - Desktop and mobile navigation.
 
 The app predicts gravity only. It does not calculate ABV, attenuation, color, hops, yeast, or process schedules.
 
-## Browser-only data and project access
+## Accounts, cloud saving and project access
 
-Recipes, calculator drafts, library edits, and settings are stored only in this browser's `localStorage`. There is no login, cloud sync, shared database, server-side recipe storage, or automatic backup. Another browser or device will not see the data; clearing site data removes it. Download backups or recipe exports for separate copies.
+- Sign-in is email + password. Public sign-up is **disabled in the backend** (verified: a direct sign-up call returns "Signups not allowed for this instance"). The owner adds accounts in Lovable under **Cloud → Users → Add user** (Send invitation, or Create new user with a password). The agent has not sent any invitation or reset email.
+- Invitation links open the app, which routes to `/reset-password` to choose a password. "Forgot password?" sends a reset link to `/reset-password`. Expired or used links show a clear message.
+- All workbench pages require sign-in; nothing private renders before the session check finishes.
+- Data lives in five owner-scoped tables (`brew_recipes`, `brew_ingredients`, `brew_settings`, `brew_drafts`, `brew_account_state`). Each stores a validated, schema-versioned JSON document. Row-level security allows only `owner_id = auth.uid()` for select/insert/update/delete; anonymous clients have no table grants. Owner ids are checked by the database, not trusted from the browser.
+- Each new account gets its own copy of the 23 source malts once (recorded in `brew_account_state`); an emptied library stays empty.
+- Browser data from before accounts is never imported automatically. Settings shows counts and imports only new items; existing cloud items are never overwritten and retries add nothing. Browser originals are left untouched.
+- "Saved to your account" appears only after the backend confirms a write; failures show an error.
+- Not yet: offline editing, conflict merging between two devices editing the same item at once (last save wins), Google sign-in.
 
-The Lovable project remains **unpublished**. Its editor is workspace-accessible on the current plan; owner-only editor access requires Business/Enterprise. Brewing data entered in the app is not stored in the Lovable project.
+The Lovable project remains **unpublished**. Its editor is workspace-accessible on the current plan; owner-only editor access requires Business/Enterprise.
 
 ## Source and formula mapping
 
@@ -69,18 +78,9 @@ src/routes/        TanStack Start routes and per-route metadata
 
 Unreadable, invalid, or unsupported-version sections are not overwritten. Saving that section pauses until the user downloads the raw value, if desired, and explicitly resets it. Other sections remain usable. If browser storage cannot be opened or read, the app reports it as unavailable instead of crashing.
 
-### Replacing the repository with authenticated storage
+### Authenticated repository
 
-A future Lovable Cloud implementation should implement `BrewRepository` with kind `authenticated-backend` and keep the domain and screen contracts unchanged:
-
-1. Enable Lovable Cloud and add authenticated user accounts.
-2. Add per-user recipe, ingredient, settings, and draft records with an owner user ID and validated numeric snapshots.
-3. Enforce row-level security so users can select, insert, update, and delete only their own rows. Keep privileged server access out of ordinary reads.
-4. Call authenticated app server functions from a new repository implementation; do not expose private records through public routes or loaders.
-5. Preserve versioned validation, explicit migration/reset behavior, and the current ingredient snapshot semantics.
-6. Add conflict/offline behavior and migration from browser exports before presenting the backend as synchronized storage.
-
-None of those backend steps is active in this scaffold.
+`CloudBrewRepository` (`src/storage/cloud-repository.ts`) implements `BrewRepository` for a single signed-in user. It refuses to run once the live session belongs to someone else and serializes writes so autosaves cannot overtake each other. `BrewStoreProvider` is keyed by user id under the `_authenticated` layout, so signing out or switching accounts discards in-memory data and ignores late responses. `LocalBrewRepository` is kept for reading legacy browser data and in tests.
 
 ## AppleScript and folder automation
 
@@ -96,13 +96,10 @@ oj typecheck -b --noEmit
 bun run build
 ```
 
-Verification on 2026-11-13:
+Verification on 2026-11-13 (accounts pass):
 
-- `bunx vitest run`: 6 test files, 92 tests passed.
-- `oj typecheck -b --noEmit`: passed with no errors.
-- `bun run build`: production client, SSR, and Cloudflare-module build passed.
-- Playwright against the local app exercised recipe-form creation, reference-example calculation and save, exact saved OG, reload persistence, recipe editing without grain-bill loss, library editing with snapshot preservation, invalid-row OG suppression, and mobile drawer/bottom navigation.
-- A fresh `/` load returned HTTP 200 and rendered the dashboard with no console or page errors. Two mobile menu open/close cycles and a fresh reload also passed; forced AppShell hot refreshes with the drawer both closed and open produced no errors.
-- Actual JSON, Markdown, and manifest downloads were saved and inspected for recipe data, exact calculations, readable output, sanitized paths, and pending-automation metadata.
+- `bunx vitest run`: 8 files, 96 tests passed. `oj typecheck -b --noEmit` and `bun run build` passed.
+- Backend isolation with two temporary confirmed accounts (deleted afterwards) and a signed-out client: A could not read, update or delete B's recipes, library entries, settings, drafts or account state by guessed id; spoofed-owner inserts/upserts were rejected by row-level security; signed-out access was denied; public sign-up was rejected by the backend.
+- Playwright: signed-out redirect, wrong-password error, sign-in, library seeding, reference example OG 1.060 / +8.3 saved to a recipe, JSON export with exact OG, the recipe visible in a fresh second (mobile) session, reviewed legacy import with idempotent retry and browser original kept, sign-out with no data on Back, and a second account seeing none of the first account's data in the list or by direct URL.
 
 Tests cover formula parity, grain/extract factors, readiness and validation, overflow, weights and blank rows, library uniqueness and PPG derivation, snapshots, storage envelopes and reset behavior, unavailable browser storage, recipe duplication/write-back, export round trips, path sanitization, `/` route matching, and a real provider/AppShell render with Radix mobile-menu open/close.

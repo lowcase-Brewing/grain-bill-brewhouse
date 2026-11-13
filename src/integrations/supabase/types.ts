@@ -14,7 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      brew_account_state: {
+        Row: {
+          created_at: string
+          legacy_import_completed_at: string | null
+          library_seeded_at: string | null
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          legacy_import_completed_at?: string | null
+          library_seeded_at?: string | null
+          owner_id?: string
+        }
+        Update: {
+          created_at?: string
+          legacy_import_completed_at?: string | null
+          library_seeded_at?: string | null
+          owner_id?: string
+        }
+        Relationships: []
+      }
+      brew_drafts: {
+        Row: {
+          doc: Json
+          key: string
+          owner_id: string
+          schema_version: number
+          updated_at: string
+        }
+        Insert: {
+          doc: Json
+          key: string
+          owner_id?: string
+          schema_version?: number
+          updated_at?: string
+        }
+        Update: {
+          doc?: Json
+          key?: string
+          owner_id?: string
+          schema_version?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      brew_ingredients: {
+        Row: {
+          doc: Json
+          id: string
+          owner_id: string
+          schema_version: number
+          updated_at: string
+        }
+        Insert: {
+          doc: Json
+          id: string
+          owner_id?: string
+          schema_version?: number
+          updated_at?: string
+        }
+        Update: {
+          doc?: Json
+          id?: string
+          owner_id?: string
+          schema_version?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      brew_recipes: {
+        Row: {
+          doc: Json
+          id: string
+          owner_id: string
+          schema_version: number
+          updated_at: string
+        }
+        Insert: {
+          doc: Json
+          id: string
+          owner_id?: string
+          schema_version?: number
+          updated_at?: string
+        }
+        Update: {
+          doc?: Json
+          id?: string
+          owner_id?: string
+          schema_version?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      brew_settings: {
+        Row: {
+          doc: Json
+          owner_id: string
+          schema_version: number
+          updated_at: string
+        }
+        Insert: {
+          doc: Json
+          owner_id?: string
+          schema_version?: number
+          updated_at?: string
+        }
+        Update: {
+          doc?: Json
+          owner_id?: string
+          schema_version?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

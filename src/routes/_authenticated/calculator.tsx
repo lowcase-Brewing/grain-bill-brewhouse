@@ -16,7 +16,7 @@ import { applyGrainBillToRecipe, emptyRecipeForm, validateRecipeForm, type Recip
 import { BREW_METHODS, BREW_METHOD_LABELS, type BrewMethod } from "@/domain/types";
 import { nowIso, useBrewStore } from "@/storage/brew-store";
 
-export const Route = createFileRoute("/calculator")({
+export const Route = createFileRoute("/_authenticated/calculator")({
   head: () => ({
     meta: [
       { title: "Grain bill calculator · lowcase Brewing" },
@@ -38,7 +38,7 @@ function CalculatorPage() {
       <PageHeader
         eyebrow="Calculator"
         title="Grain bill calculator"
-        description="Reproduces the Grain Bill tab of lowcase Grain Bill Calculations (read-only snapshot, 2026-11-13). Scratch work autosaves in this browser."
+        description="Reproduces the Grain Bill tab of lowcase Grain Bill Calculations (read-only snapshot, 2026-11-13). Scratch work autosaves to your account."
       />
       <WhenStoreReady><Scratch /></WhenStoreReady>
     </>
@@ -96,7 +96,7 @@ function Scratch() {
             </div>
           ) : undefined
         }
-        resultsFooter={<p>{dirty ? "Scratch draft autosaved in this browser." : "Nothing in progress."}</p>}
+        resultsFooter={<p>{dirty ? "Scratch draft autosaved to your account." : "Nothing in progress."}</p>}
       />
       <SaveAsRecipeDialog
         open={saveOpen}

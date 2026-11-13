@@ -16,6 +16,9 @@ interface BrewStoreValue {
   data: RepositorySnapshot | null;
   saveState: SaveState;
   repositoryDescription: string;
+  repositoryKind: BrewRepository["kind"];
+  repository: BrewRepository | null;
+  reload(): Promise<void>;
   actions: {
     createRecipe(core: RecipeCore, grainBill?: GrainRowInput[]): Promise<Recipe | null>;
     saveRecipe(recipe: Recipe): Promise<boolean>;
@@ -41,8 +44,19 @@ export function nowIso(): string {
   return new Date().toISOString();
 }
 
-export function BrewStoreProvider({ children }: { children: ReactNode }) {
+export function BrewStoreProvider({
+  children,
+  createRepository,
+}: {
+  children: ReactNode;
+  /** Defaults to browser-local storage. Signed-in screens pass a repository bound to one account. */
+  createRepository?: () => BrewRepository;
+}) {
   const repoRef = useRef<BrewRepository | null>(null);
+  // Set false on unmount (sign-out / account switch remounts this provider):
+  // any async completion that arrives afterwards is ignored.
+  const alive = useRef(true);
+  const factory = useRef(createRepository);
   const [status, setStatus] = useState<BrewStoreValue["status"]>("loading");
   const [data, setData] = useState<RepositorySnapshot | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -53,30 +67,47 @@ export function BrewStoreProvider({ children }: { children: ReactNode }) {
     if (!repo) return;
     try {
       const snap = await repo.loadAll();
+      if (!alive.current || repoRef.current !== repo) return;
       setData(snap);
       setSaveState(snap.issues.length ? "blocked" : "saved");
       setStatus("ready");
     } catch {
+      if (!alive.current || repoRef.current !== repo) return;
       setSaveState("error");
       setStatus("unavailable");
     }
   }, []);
 
   useEffect(() => {
+    alive.current = true;
     try {
-      const storage = window.localStorage;
-      if (!storage) throw new Error("Browser storage is unavailable");
-      repoRef.current = new LocalBrewRepository(storage);
+      if (factory.current) {
+        repoRef.current = factory.current();
+      } else {
+        const storage = window.localStorage;
+        if (!storage) throw new Error("Browser storage is unavailable");
+        repoRef.current = new LocalBrewRepository(storage);
+      }
     } catch {
       setStatus("unavailable");
       return;
     }
     void load();
+    if (factory.current) {
+      return () => {
+        alive.current = false;
+        repoRef.current = null;
+      };
+    }
     const onStorage = (e: StorageEvent) => {
       if (e.key && Object.values(STORAGE_KEYS).includes(e.key)) void load();
     };
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    return () => {
+      alive.current = false;
+      repoRef.current = null;
+      window.removeEventListener("storage", onStorage);
+    };
   }, [load]);
 
   const run = useCallback(
@@ -86,16 +117,18 @@ export function BrewStoreProvider({ children }: { children: ReactNode }) {
       setSaveState("saving");
       try {
         await op(repo);
+        if (!alive.current || repoRef.current !== repo) return false;
         setData((d) => (d ? apply(d) : d));
         setSaveState("saved");
         return true;
       } catch (err) {
+        if (!alive.current || repoRef.current !== repo) return false;
         setSaveState(err instanceof Error && err.name === "StorageBlockedError" ? "blocked" : "error");
         const t = Date.now();
         if (!quiet || t - lastErrorToast.current > 5000) {
           lastErrorToast.current = t;
-          toast.error("Couldn't save in this browser", {
-            description: err instanceof Error ? err.message : "Storage may be full or unavailable.",
+          toast.error(repo.kind === "authenticated-backend" ? "Couldn't save to your account" : "Couldn't save in this browser", {
+            description: err instanceof Error ? err.message : repo.kind === "authenticated-backend" ? "Check your connection and try again." : "Storage may be full or unavailable.",
           });
         }
         return false;
@@ -131,7 +164,8 @@ export function BrewStoreProvider({ children }: { children: ReactNode }) {
       },
       async importRecipe(recipe) {
         const exists = data?.recipes.some((r) => r.id === recipe.id);
-        const r: Recipe = exists ? { ...recipe, id: newId() } : recipe;
+        const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recipe.id);
+        const r: Recipe = exists || !uuid ? { ...recipe, id: newId() } : recipe;
         const ok = await run((repo) => repo.upsertRecipe(r), (d) => ({ ...d, recipes: [...d.recipes, r] }));
         return ok ? r : null;
       },
@@ -182,9 +216,12 @@ export function BrewStoreProvider({ children }: { children: ReactNode }) {
       saveState,
       repositoryDescription:
         repoRef.current?.description ?? "Saved only in this browser's local storage on this device.",
+      repositoryKind: repoRef.current?.kind ?? (factory.current ? "authenticated-backend" : "browser-local"),
+      repository: repoRef.current,
+      reload: load,
       actions,
     }),
-    [status, data, saveState, actions],
+    [status, data, saveState, actions, load],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
