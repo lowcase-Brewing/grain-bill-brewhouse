@@ -49,7 +49,7 @@ function Scratch() {
   const { data, actions } = useBrewStore();
   const navigate = useNavigate();
   const baseline = useMemo<EditorState>(() => ({ settings: { ...DEFAULT_CALC_SETTINGS }, rows: [], loadedExample: false }), []);
-  const { state, setState, result, dirty } = useGrainBillWork(SCRATCH_KEY, null, baseline);
+  const { state, setState, resetWork, result, dirty } = useGrainBillWork(SCRATCH_KEY, null, baseline);
   const [saveOpen, setSaveOpen] = useState(false);
 
   const loadExample = () => {

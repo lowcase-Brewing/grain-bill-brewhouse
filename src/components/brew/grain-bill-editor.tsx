@@ -58,7 +58,15 @@ export function useGrainBillWork(draftKey: string, recipeId: string | null, base
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, baseline]);
 
-  return { state, setState, result, dirty, hasDraft };
+  const resetWork = (next: EditorState) => {
+    // Resetting must remove an existing draft immediately. Waiting for the
+    // autosave timer would leave a stale draft if the user navigates away now.
+    latest.current = { state: next, baseline, hasDraft: false };
+    setState(next);
+    void actions.deleteDraft(draftKey);
+  };
+
+  return { state, setState, resetWork, result, dirty, hasDraft };
 }
 
 const SETTING_FIELDS: { field: SettingField; label: string; unit: string; hint: string }[] = [
@@ -339,7 +347,7 @@ export function GrainBillWorkspace({
   resultsFooter?: ReactNode;
 }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+    <div className="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_20rem]">
       <div className="min-w-0 space-y-6">
         {banner}
         <Panel title="Settings">
@@ -352,7 +360,7 @@ export function GrainBillWorkspace({
           <RowsEditor rows={state.rows} result={result} library={library} onChange={(rows) => setState({ ...state, rows })} />
         </Panel>
       </div>
-      <div className="xl:sticky xl:top-8 xl:self-start">
+      <div className="2xl:sticky 2xl:top-8 2xl:self-start">
         <ResultsPanel result={result}>{resultsFooter}</ResultsPanel>
       </div>
     </div>

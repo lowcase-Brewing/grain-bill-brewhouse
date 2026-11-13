@@ -47,7 +47,7 @@ function RecipeGrainBill({ recipe }: { recipe: Recipe }) {
     () => ({ settings: parametersToSettingsInput(recipe.parameters), rows: recipe.grainBill, loadedExample: false }),
     [recipe],
   );
-  const { state, setState, result, dirty } = useGrainBillWork(`recipe:${recipe.id}`, recipe.id, baseline);
+  const { state, setState, resetWork, result, dirty } = useGrainBillWork(`recipe:${recipe.id}`, recipe.id, baseline);
 
   const save = async () => {
     const params = settingsToParameters(state.settings);
