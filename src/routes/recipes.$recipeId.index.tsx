@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Calculator, Copy, Trash2 } from "lucide-react";
+import { Calculator, Copy, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { ConfirmButton } from "@/components/brew/confirm-button";
 import { ExportActions } from "@/components/brew/export-actions";
 import { PageHeader, Panel, WhenStoreReady } from "@/components/brew/page";
 import { RecipeForm } from "@/components/brew/recipe-form";
+import { RecipeMissing } from "@/components/brew/recipe-missing";
 import { formatDate, formatLb, formatOG, formatPoints, formatSignedPoints } from "@/domain/format";
 import { applyRecipeCore, parametersToSettingsInput, recipeToFormInput } from "@/domain/recipe";
 import { buildProjectManifest } from "@/domain/workflow";
@@ -28,16 +29,6 @@ export const Route = createFileRoute("/recipes/$recipeId/")({
 
 function RecipePage() {
   return <WhenStoreReady><RecipeDetail /></WhenStoreReady>;
-}
-
-export function RecipeMissing() {
-  return (
-    <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center">
-      <p className="font-display text-lg">That recipe isn't in this browser.</p>
-      <p className="mt-1 text-sm text-muted-foreground">It may have been deleted, or saved in a different browser.</p>
-      <Button asChild className="mt-5" variant="outline"><Link to="/recipes"><ArrowLeft /> Back to recipes</Link></Button>
-    </div>
-  );
 }
 
 function RecipeDetail() {

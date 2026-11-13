@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipesIndexRouteImport } from './routes/recipes.index'
 import { Route as RecipesNewRouteImport } from './routes/recipes.new'
+import { Route as RecipesRecipeIdIndexRouteImport } from './routes/recipes.$recipeId.index'
+import { Route as RecipesRecipeIdGrainBillRouteImport } from './routes/recipes.$recipeId.grain-bill'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +30,70 @@ const RecipesNewRoute = RecipesNewRouteImport.update({
   path: '/recipes/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecipesRecipeIdIndexRoute = RecipesRecipeIdIndexRouteImport.update({
+  id: '/recipes/$recipeId/',
+  path: '/recipes/$recipeId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecipesRecipeIdGrainBillRoute =
+  RecipesRecipeIdGrainBillRouteImport.update({
+    id: '/recipes/$recipeId/grain-bill',
+    path: '/recipes/$recipeId/grain-bill',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/recipes/new': typeof RecipesNewRoute
   '/recipes/': typeof RecipesIndexRoute
+  '/recipes/$recipeId/grain-bill': typeof RecipesRecipeIdGrainBillRoute
+  '/recipes/$recipeId/': typeof RecipesRecipeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/recipes/new': typeof RecipesNewRoute
   '/recipes': typeof RecipesIndexRoute
+  '/recipes/$recipeId/grain-bill': typeof RecipesRecipeIdGrainBillRoute
+  '/recipes/$recipeId': typeof RecipesRecipeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/recipes/new': typeof RecipesNewRoute
   '/recipes/': typeof RecipesIndexRoute
+  '/recipes/$recipeId/grain-bill': typeof RecipesRecipeIdGrainBillRoute
+  '/recipes/$recipeId/': typeof RecipesRecipeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/recipes/new' | '/recipes/'
+  fullPaths:
+    | '/'
+    | '/recipes/new'
+    | '/recipes/'
+    | '/recipes/$recipeId/grain-bill'
+    | '/recipes/$recipeId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/recipes/new' | '/recipes'
-  id: '__root__' | '/' | '/recipes/new' | '/recipes/'
+  to:
+    | '/'
+    | '/recipes/new'
+    | '/recipes'
+    | '/recipes/$recipeId/grain-bill'
+    | '/recipes/$recipeId'
+  id:
+    | '__root__'
+    | '/'
+    | '/recipes/new'
+    | '/recipes/'
+    | '/recipes/$recipeId/grain-bill'
+    | '/recipes/$recipeId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RecipesNewRoute: typeof RecipesNewRoute
   RecipesIndexRoute: typeof RecipesIndexRoute
+  RecipesRecipeIdGrainBillRoute: typeof RecipesRecipeIdGrainBillRoute
+  RecipesRecipeIdIndexRoute: typeof RecipesRecipeIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +119,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecipesNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recipes/$recipeId/': {
+      id: '/recipes/$recipeId/'
+      path: '/recipes/$recipeId'
+      fullPath: '/recipes/$recipeId/'
+      preLoaderRoute: typeof RecipesRecipeIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipes/$recipeId/grain-bill': {
+      id: '/recipes/$recipeId/grain-bill'
+      path: '/recipes/$recipeId/grain-bill'
+      fullPath: '/recipes/$recipeId/grain-bill'
+      preLoaderRoute: typeof RecipesRecipeIdGrainBillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +140,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RecipesNewRoute: RecipesNewRoute,
   RecipesIndexRoute: RecipesIndexRoute,
+  RecipesRecipeIdGrainBillRoute: RecipesRecipeIdGrainBillRoute,
+  RecipesRecipeIdIndexRoute: RecipesRecipeIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -9,7 +9,7 @@ import { PageHeader, WhenStoreReady } from "@/components/brew/page";
 import { applyGrainBillToRecipe, parametersToSettingsInput, settingsToParameters } from "@/domain/recipe";
 import type { Recipe } from "@/domain/types";
 import { nowIso, useBrewStore } from "@/storage/brew-store";
-import { RecipeMissing } from "./recipes.$recipeId.index";
+import { RecipeMissing } from "@/components/brew/recipe-missing";
 
 export const Route = createFileRoute("/recipes/$recipeId/grain-bill")({
   head: () => ({
