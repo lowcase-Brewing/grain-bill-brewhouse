@@ -58,7 +58,7 @@ function ResetPasswordPage() {
 
   if (linkError || phase === "missing") {
     return (
-      <AuthCard title="This link can't be used" description={linkError ? decodeURIComponent(linkError.replace(/\+/g, " ")) : "The link is missing, expired, or was already used."}>
+      <AuthCard title="This link can't be used" description={formatLinkError(linkError, MISSING_LINK_TEXT)}>
         <p className="text-sm text-muted-foreground">{mode === "invite" ? "Ask the owner to send a fresh invitation." : "Request a new reset link from the sign-in page."}</p>
         <Button asChild className="mt-4 w-full"><Link to="/auth">Go to sign in</Link></Button>
       </AuthCard>
