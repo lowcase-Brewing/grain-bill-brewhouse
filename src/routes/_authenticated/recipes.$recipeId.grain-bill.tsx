@@ -11,7 +11,7 @@ import type { Recipe } from "@/domain/types";
 import { nowIso, useBrewStore } from "@/storage/brew-store";
 import { RecipeMissing } from "@/components/brew/recipe-missing";
 
-export const Route = createFileRoute("/recipes/$recipeId/grain-bill")({
+export const Route = createFileRoute("/_authenticated/recipes/$recipeId/grain-bill")({
   head: () => ({
     meta: [
       { title: "Recipe grain bill · lowcase Brewing" },

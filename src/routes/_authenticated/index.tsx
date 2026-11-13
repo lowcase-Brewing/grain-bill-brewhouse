@@ -7,7 +7,7 @@ import { formatDate, formatOG } from "@/domain/format";
 import { BREW_METHOD_LABELS } from "@/domain/types";
 import { useBrewStore } from "@/storage/brew-store";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Dashboard · lowcase Brewing" },

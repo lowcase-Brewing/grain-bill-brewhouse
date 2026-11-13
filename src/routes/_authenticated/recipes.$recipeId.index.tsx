@@ -13,7 +13,7 @@ import { applyRecipeCore, parametersToSettingsInput, recipeToFormInput } from "@
 import { buildProjectManifest } from "@/domain/workflow";
 import { nowIso, useBrewStore } from "@/storage/brew-store";
 
-export const Route = createFileRoute("/recipes/$recipeId/")({
+export const Route = createFileRoute("/_authenticated/recipes/$recipeId/")({
   head: () => ({
     meta: [
       { title: "Recipe · lowcase Brewing" },

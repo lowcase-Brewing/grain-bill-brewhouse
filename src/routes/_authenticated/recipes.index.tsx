@@ -12,7 +12,7 @@ import { formatDate, formatOG } from "@/domain/format";
 import { BREW_METHOD_LABELS } from "@/domain/types";
 import { useBrewStore } from "@/storage/brew-store";
 
-export const Route = createFileRoute("/recipes/")({
+export const Route = createFileRoute("/_authenticated/recipes/")({
   head: () => ({
     meta: [
       { title: "Recipes · lowcase Brewing" },

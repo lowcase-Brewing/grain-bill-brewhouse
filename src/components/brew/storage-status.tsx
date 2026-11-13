@@ -3,19 +3,20 @@ import { cn } from "@/lib/utils";
 import { useBrewStore } from "@/storage/brew-store";
 
 export function StorageStatus({ tone = "light", className }: { tone?: "light" | "dark"; className?: string }) {
-  const { status, saveState } = useBrewStore();
-  let label = "Saved in this browser";
+  const { status, saveState, repositoryKind } = useBrewStore();
+  const cloud = repositoryKind === "authenticated-backend";
+  let label = cloud ? "Saved to your account" : "Saved in this browser";
   let dot = "bg-success";
   let problem = false;
   if (status === "loading") {
-    label = "Opening browser storage…";
+    label = cloud ? "Loading your account…" : "Opening browser storage…";
     dot = "bg-muted-foreground";
   } else if (status === "unavailable") {
-    label = "Browser storage unavailable";
+    label = cloud ? "Couldn't reach your account — see Settings" : "Browser storage unavailable";
     dot = "bg-destructive";
     problem = true;
   } else if (saveState === "saving") {
-    label = "Saving in this browser…";
+    label = cloud ? "Saving to your account…" : "Saving in this browser…";
     dot = "bg-amber";
   } else if (saveState === "blocked") {
     label = "Some saving paused — see Settings";

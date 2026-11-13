@@ -15,7 +15,7 @@ import { buildProjectManifest, PATTERN_TOKENS, PROPOSED_DEFAULT_WORKFLOW, valida
 import { downloadText } from "@/lib/download";
 import { nowIso, useBrewStore } from "@/storage/brew-store";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: "Workflow & settings · lowcase Brewing" },

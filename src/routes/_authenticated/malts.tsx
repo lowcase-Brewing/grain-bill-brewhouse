@@ -15,7 +15,7 @@ import { INGREDIENT_CATEGORIES, type Ingredient, type IngredientCategory } from 
 import { cn } from "@/lib/utils";
 import { newId, nowIso, useBrewStore } from "@/storage/brew-store";
 
-export const Route = createFileRoute("/malts")({
+export const Route = createFileRoute("/_authenticated/malts")({
   head: () => ({
     meta: [
       { title: "Malt library · lowcase Brewing" },

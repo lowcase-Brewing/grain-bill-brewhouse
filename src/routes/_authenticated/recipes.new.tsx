@@ -5,7 +5,7 @@ import { RecipeForm } from "@/components/brew/recipe-form";
 import { emptyRecipeForm } from "@/domain/recipe";
 import { useBrewStore } from "@/storage/brew-store";
 
-export const Route = createFileRoute("/recipes/new")({
+export const Route = createFileRoute("/_authenticated/recipes/new")({
   head: () => ({
     meta: [
       { title: "New recipe · lowcase Brewing" },

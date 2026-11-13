@@ -16,7 +16,7 @@ import { applyGrainBillToRecipe, emptyRecipeForm, validateRecipeForm, type Recip
 import { BREW_METHODS, BREW_METHOD_LABELS, type BrewMethod } from "@/domain/types";
 import { nowIso, useBrewStore } from "@/storage/brew-store";
 
-export const Route = createFileRoute("/calculator")({
+export const Route = createFileRoute("/_authenticated/calculator")({
   head: () => ({
     meta: [
       { title: "Grain bill calculator · lowcase Brewing" },
