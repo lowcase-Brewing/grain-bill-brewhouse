@@ -1,5 +1,9 @@
 # QA roadmap
 
+- [ ] Expand active standard catalog to 48, preserve 23-row history and 8 legacy buckets, audit official sources/yield bases.
+- [ ] Add reviewed, selected, insert-only private library additions with conflict/retry safeguards.
+- [ ] Verify full tests, public/mobile calculator/reference and simulated private update flow; stop before publication.
+
 - [x] Add Apple and Google sign-in alongside email/password and verify controls, session boundaries, and mobile display (103 tests passed).
 - [x] Invite-only hosted registration restored: owner enabled Disable sign-up; settings report disable_signup=true (2026-11-14).
 - [ ] Owner to test real Apple/Google sign-in, invitation and password-reset roundtrips.
