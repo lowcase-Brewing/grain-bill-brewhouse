@@ -4,6 +4,7 @@ import { formatLb, formatOG, formatPercent, formatPoints, formatPpg, formatSigne
 import { parametersToSettingsInput } from "./recipe";
 import { recipeSchema } from "./schema";
 import { SHEET_SOURCE } from "./seed-malts";
+import { STANDARD_CATALOG_VERSION } from "./standard-malts";
 import { BREW_METHOD_LABELS, type Recipe, type WorkflowTemplate } from "./types";
 import { buildProjectManifest, exportFileNames, type ProjectManifest } from "./workflow";
 
@@ -16,6 +17,7 @@ export interface RecipeExport {
   exportedAt: string;
   app: { name: "lowcase Brewing" };
   formulaSource: typeof SHEET_SOURCE;
+  catalogVersion?: string;
   recipe: Recipe;
   calculation: {
     note: string;
@@ -37,6 +39,7 @@ export function buildRecipeExport(recipe: Recipe, template: WorkflowTemplate, no
     exportedAt: now,
     app: { name: "lowcase Brewing" },
     formulaSource: SHEET_SOURCE,
+    catalogVersion: STANDARD_CATALOG_VERSION,
     recipe,
     calculation: {
       note: "Recomputed at export from the recipe's saved ingredient snapshots. Gravity prediction only; no ABV or color.",
@@ -123,7 +126,7 @@ export function recipeToMarkdown(recipe: Recipe, template: WorkflowTemplate, now
   md += `AppleScript workflow mapping pending — these folders were **not** created.\n\n`;
   md += "```\n" + [manifest.rootFolder + "/", ...manifest.folders.map((f) => "  " + f.slice(manifest.rootFolder.length + 1) + "/")].join("\n") + "\n```\n\n";
   md += `Files:\n\n${manifest.files.map((f) => `- \`${f.path}\``).join("\n")}\n\n`;
-  md += `---\nExported ${now} from lowcase Brewing (schema v${RECIPE_EXPORT_SCHEMA_VERSION}). Formulas: ${SHEET_SOURCE.title}, ${SHEET_SOURCE.sync}, fetched ${SHEET_SOURCE.fetchedOn}.\n`;
+  md += `---\nExported ${now} from lowcase Brewing (schema v${RECIPE_EXPORT_SCHEMA_VERSION}). Catalog ${STANDARD_CATALOG_VERSION}; values use saved snapshots. Formulas: ${SHEET_SOURCE.title}, ${SHEET_SOURCE.sync}, fetched ${SHEET_SOURCE.fetchedOn}.\n`;
   return md;
 }
 

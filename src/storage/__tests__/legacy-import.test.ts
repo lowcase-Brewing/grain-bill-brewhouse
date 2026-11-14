@@ -18,7 +18,7 @@ describe("legacy browser import plan", () => {
     expect(plan.recipes.map((r) => r.name)).toEqual(["New"]);
     expect(plan.library.map((i) => i.name)).toEqual(["House Malt"]);
     expect(plan.settings).toBeNull();
-    expect(plan.skipped).toEqual({ recipes: 1, library: 24, settings: 1, drafts: 0 });
+    expect(plan.skipped).toEqual({ recipes: 1, library: 49, settings: 1, drafts: 0 });
   });
 
   it("is idempotent: a retry after a completed import has nothing new", () => {
