@@ -19,7 +19,7 @@ const historical: StandardMalt[] = SEED_MALT_RECORDS.map((r) => {
     manufacturer: "Historical generic reference", product: r.name, aliases: r.name === "Flakes Oats" ? ["Flakes Oats"] : [],
     group: legacyNames.has(r.name) ? "Legacy broad reference" : r.category,
     category: r.category, color: "Not specified in historical snapshot", handling: r.category === "Extract" ? "Dissolve in the kettle; extract recovery applies, not grain efficiency." : r.category === "Adjunct" ? "Mash with enzymatically active base malt; not a steep-only gravity source." : "Mash for modeled gravity; verify handling for the actual product.",
-    sourceUrl: "https://docs.google.com/spreadsheets/d/1Pt1-_KuAajbMuQyurMEO_3zRcpQgrYSYx5pL1SHncqA/edit", checkedOn: "2026-11-13",
+    sourceUrl: null, checkedOn: "2026-11-13",
     yield: { kind: "historical-estimate", basis: r.category === "Extract" ? "Direct 45 PPG generic planning estimate; unchanged." : "Original generic planning fraction × 46; dry/as-is basis unverified and unchanged." },
   } };
 });

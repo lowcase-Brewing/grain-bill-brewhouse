@@ -1,5 +1,9 @@
 # QA roadmap
 
+- [x] Remove public raw history/source-sheet links, shorten card notes, and label account reference overrides without changing stored data.
+- [x] Run catalog/privacy/customization/update regressions and full tests (161 passed); browser check desktop/mobile and unchanged fixture; record automatic build OK without publishing.
+- [ ] Separately identify production build/typecheck validation: blocked by environment prohibition on manual execution and automatic log exposing only undifferentiated “build OK”.
+
 - [x] Expand active standard catalog to 48, preserve 23-row history and 8 legacy buckets, audit official sources/yield bases.
 - [x] Add reviewed, selected, insert-only private library additions with conflict/retry safeguards.
 - [x] Verify 154 tests, automatic typecheck/build, public/mobile calculator/reference and simulated private update flow; stop before publication.
