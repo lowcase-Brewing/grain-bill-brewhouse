@@ -10,7 +10,7 @@ A private, invite-only brewing workbench for lowcase Brewing in Weslaco, Texas. 
 - Recipe creation, search, editing, duplication, deletion, and versioned JSON import.
 - Recipe fields for name, style, semantic version, brew method, gravity parameters, description, notes, hops, yeast, and process.
 - Shared standalone and recipe grain bill calculator with raw-input validation, per-row results, autosaved drafts, and save-back to a recipe.
-- A 23-entry editable malt, adjunct, and extract library seeded from the source sheet. Saved rows retain ingredient numeric snapshots when the library changes.
+- A 48-entry active standard malt, adjunct, and extract catalog, with 8 legacy broad references retained for compatibility and the original 23-row sheet snapshot available separately. Saved rows retain ingredient numeric snapshots when the library changes.
 - Client-side recipe JSON, readable Markdown, and planned-project manifest downloads, with sanitized file and path components.
 - Editable proposed folder template and preview in Settings.
 - Full account backup download, raw download of unreadable storage sections, explicit section reset, and seed-library restoration.
@@ -24,7 +24,7 @@ The app predicts gravity only. It does not calculate ABV, attenuation, color, ho
 - Invitation links open the app, which routes to `/reset-password` to choose a password. "Forgot password?" sends a reset link to `/reset-password`. Expired or used links show a clear message.
 - All workbench pages require sign-in; nothing private renders before the session check finishes.
 - Data lives in five owner-scoped tables (`brew_recipes`, `brew_ingredients`, `brew_settings`, `brew_drafts`, `brew_account_state`). Each stores a validated, schema-versioned JSON document. Row-level security allows only `owner_id = auth.uid()` for select/insert/update/delete; anonymous clients have no table grants. Owner ids are checked by the database, not trusted from the browser.
-- Each new account gets its own copy of the 23 source malts once (recorded in `brew_account_state`); an emptied library stays empty.
+- Each new account gets the active 48 standard entries once (recorded in `brew_account_state`); an emptied library stays empty. Existing accounts use Malt Library → Review library updates to select missing additions without replacing edits or legacy entries.
 - Browser data from before accounts is never imported automatically. Settings shows counts and imports only new items; existing cloud items are never overwritten and retries add nothing. Browser originals are left untouched.
 - "Saved to your account" appears only after the backend confirms a write; failures show an error.
 - Not yet: offline editing, conflict merging between two devices editing the same item at once (last save wins).
@@ -33,7 +33,7 @@ The invite-only beta is **published** at https://brew.lowcasebrewing.com. Its ed
 
 ## Source and formula mapping
 
-Authoritative source: [lowcase Grain Bill Calculations](https://docs.google.com/spreadsheets/d/1Pt1-_KuAajbMuQyurMEO_3zRcpQgrYSYx5pL1SHncqA/edit), **Grain Bill** and **Malt Library** tabs. The included data is a read-only snapshot fetched 2026-11-13, not a live sync.
+Authoritative formula source: [lowcase Grain Bill Calculations](https://docs.google.com/spreadsheets/d/1Pt1-_KuAajbMuQyurMEO_3zRcpQgrYSYx5pL1SHncqA/edit), **Grain Bill** and **Malt Library** tabs. `src/domain/seed-malts.ts` preserves its original 23-row read-only snapshot from 2026-11-13 unchanged. The expanded catalog is not a verbatim sheet snapshot; its official product sources and planning assumptions are in `src/domain/standard-malts.ts` and [the catalog audit](CATALOG-AUDIT.md).
 
 For each row:
 
@@ -109,4 +109,8 @@ Verification on 2026-11-13 (accounts pass):
 Tests cover formula parity, grain/extract factors, readiness and validation, overflow, weights and blank rows, library uniqueness and PPG derivation, snapshots, storage envelopes and reset behavior, unavailable browser storage, recipe duplication/write-back, export round trips, path sanitization, `/` route matching, and a real provider/AppShell render with Radix mobile-menu open/close.
 
 ## Public tools (beta)
-`/` is a public tools landing, `/tools/grain-bill` a guest calculator (page memory only, plain-text download, invalid exports marked incomplete) and `/tools/malts` a read-only standard 23-ingredient reference. Public pages never contact the account backend. The private dashboard moved to `/workbench`; `/calculator`, `/malts`, `/recipes`, `/settings` stay signed-in only. Accounts remain invite-only; pages stay `noindex`. `VITE_PUBLIC_TOOLS_LOCAL_ONLY` is a local-rehearsal switch and must not be set in hosted environments.
+`/` is a public tools landing, `/tools/grain-bill` a guest calculator (page memory only, plain-text download, invalid exports marked incomplete) and `/tools/malts` a read-only active 48-ingredient reference with expandable historical 23-row reference. Public pages never contact the account backend. The private dashboard moved to `/workbench`; `/calculator`, `/malts`, `/recipes`, `/settings` stay signed-in only. Accounts remain invite-only; pages stay `noindex`. `VITE_PUBLIC_TOOLS_LOCAL_ONLY` is a local-rehearsal switch and must not be set in hosted environments.
+
+### Catalog release 2026-11-14.1 (preview only, not published)
+
+154 tests passed, including unchanged formula/reference fixture, guest isolation and four social-sign-in tests, plus catalog integrity and simulated insert-only library updates. Automatic preview typecheck/build validation reports `build OK`; no manual production build was run by the agent. Browser checks confirmed manufacturer/alias/category search, new rye calculation, real versioned text download, mobile product metadata/source links, private-route sign-in gate and Apple/Google controls. A browser-only in-memory repository confirmed selected additions, failed-save retry and historical oats/legacy preservation without modifying any real account. Backend read-only checks confirmed signup disabled and anonymous HTTP 401 for all five application tables; owner-only policies remain unchanged. Real OAuth/email roundtrips remain owner testing.
