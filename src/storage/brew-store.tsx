@@ -2,10 +2,29 @@
  * React binding for the repository. Loads after hydration (browser storage is
  * never read during SSR), exposes data + actions, and tracks save status.
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { toast } from "sonner";
-import { duplicateRecipe as duplicateRecipeDomain, createRecipe as createRecipeDomain, type RecipeCore } from "@/domain/recipe";
-import type { AppSettings, CalculatorDraft, GrainRowInput, Ingredient, Recipe } from "@/domain/types";
+import {
+  duplicateRecipe as duplicateRecipeDomain,
+  createRecipe as createRecipeDomain,
+  type RecipeCore,
+} from "@/domain/recipe";
+import type {
+  AppSettings,
+  CalculatorDraft,
+  GrainRowInput,
+  Ingredient,
+  Recipe,
+} from "@/domain/types";
 import { LocalBrewRepository, STORAGE_KEYS } from "./local-repository";
 import type { BrewRepository, RepositorySnapshot, SectionKey } from "./repository";
 
@@ -37,12 +56,8 @@ interface BrewStoreValue {
 
 const Ctx = createContext<BrewStoreValue | null>(null);
 
-export function newId(): string {
-  return crypto.randomUUID();
-}
-export function nowIso(): string {
-  return new Date().toISOString();
-}
+export { newId, nowIso } from "@/lib/identity";
+import { newId, nowIso } from "@/lib/identity";
 
 export function BrewStoreProvider({
   children,
@@ -111,7 +126,11 @@ export function BrewStoreProvider({
   }, [load]);
 
   const run = useCallback(
-    async (op: (repo: BrewRepository) => Promise<void>, apply: (d: RepositorySnapshot) => RepositorySnapshot, quiet = false) => {
+    async (
+      op: (repo: BrewRepository) => Promise<void>,
+      apply: (d: RepositorySnapshot) => RepositorySnapshot,
+      quiet = false,
+    ) => {
       const repo = repoRef.current;
       if (!repo) return false;
       setSaveState("saving");
@@ -123,13 +142,25 @@ export function BrewStoreProvider({
         return true;
       } catch (err) {
         if (!alive.current || repoRef.current !== repo) return false;
-        setSaveState(err instanceof Error && err.name === "StorageBlockedError" ? "blocked" : "error");
+        setSaveState(
+          err instanceof Error && err.name === "StorageBlockedError" ? "blocked" : "error",
+        );
         const t = Date.now();
         if (!quiet || t - lastErrorToast.current > 5000) {
           lastErrorToast.current = t;
-          toast.error(repo.kind === "authenticated-backend" ? "Couldn't save to your account" : "Couldn't save in this browser", {
-            description: err instanceof Error ? err.message : repo.kind === "authenticated-backend" ? "Check your connection and try again." : "Storage may be full or unavailable.",
-          });
+          toast.error(
+            repo.kind === "authenticated-backend"
+              ? "Couldn't save to your account"
+              : "Couldn't save in this browser",
+            {
+              description:
+                err instanceof Error
+                  ? err.message
+                  : repo.kind === "authenticated-backend"
+                    ? "Check your connection and try again."
+                    : "Storage may be full or unavailable.",
+            },
+          );
         }
         return false;
       }
@@ -141,7 +172,10 @@ export function BrewStoreProvider({
     () => ({
       async createRecipe(core, grainBill = []) {
         const r = createRecipeDomain(core, newId(), nowIso(), grainBill);
-        const ok = await run((repo) => repo.upsertRecipe(r), (d) => ({ ...d, recipes: [...d.recipes, r] }));
+        const ok = await run(
+          (repo) => repo.upsertRecipe(r),
+          (d) => ({ ...d, recipes: [...d.recipes, r] }),
+        );
         return ok ? r : null;
       },
       async saveRecipe(recipe) {
@@ -151,22 +185,43 @@ export function BrewStoreProvider({
         );
       },
       async deleteRecipe(id) {
-        const ok = await run((repo) => repo.deleteRecipe(id), (d) => ({ ...d, recipes: d.recipes.filter((r) => r.id !== id) }));
-        if (ok) await run((repo) => repo.deleteDraft(`recipe:${id}`), (d) => ({ ...d, drafts: d.drafts.filter((x) => x.key !== `recipe:${id}`) }), true);
+        const ok = await run(
+          (repo) => repo.deleteRecipe(id),
+          (d) => ({ ...d, recipes: d.recipes.filter((r) => r.id !== id) }),
+        );
+        if (ok)
+          await run(
+            (repo) => repo.deleteDraft(`recipe:${id}`),
+            (d) => ({ ...d, drafts: d.drafts.filter((x) => x.key !== `recipe:${id}`) }),
+            true,
+          );
         return ok;
       },
       async duplicateRecipe(id) {
         const src = data?.recipes.find((r) => r.id === id);
         if (!src || !data) return null;
-        const copy = duplicateRecipeDomain(src, newId(), nowIso(), data.recipes.map((r) => r.name));
-        const ok = await run((repo) => repo.upsertRecipe(copy), (d) => ({ ...d, recipes: [...d.recipes, copy] }));
+        const copy = duplicateRecipeDomain(
+          src,
+          newId(),
+          nowIso(),
+          data.recipes.map((r) => r.name),
+        );
+        const ok = await run(
+          (repo) => repo.upsertRecipe(copy),
+          (d) => ({ ...d, recipes: [...d.recipes, copy] }),
+        );
         return ok ? copy : null;
       },
       async importRecipe(recipe) {
         const exists = data?.recipes.some((r) => r.id === recipe.id);
-        const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recipe.id);
+        const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          recipe.id,
+        );
         const r: Recipe = exists || !uuid ? { ...recipe, id: newId() } : recipe;
-        const ok = await run((repo) => repo.upsertRecipe(r), (d) => ({ ...d, recipes: [...d.recipes, r] }));
+        const ok = await run(
+          (repo) => repo.upsertRecipe(r),
+          (d) => ({ ...d, recipes: [...d.recipes, r] }),
+        );
         return ok ? r : null;
       },
       async saveIngredient(i) {
@@ -174,34 +229,54 @@ export function BrewStoreProvider({
           (repo) => repo.upsertIngredient(i),
           (d) => ({
             ...d,
-            library: d.library.some((x) => x.id === i.id) ? d.library.map((x) => (x.id === i.id ? i : x)) : [...d.library, i],
+            library: d.library.some((x) => x.id === i.id)
+              ? d.library.map((x) => (x.id === i.id ? i : x))
+              : [...d.library, i],
           }),
         );
       },
       async deleteIngredient(id) {
-        return run((repo) => repo.deleteIngredient(id), (d) => ({ ...d, library: d.library.filter((x) => x.id !== id) }));
+        return run(
+          (repo) => repo.deleteIngredient(id),
+          (d) => ({ ...d, library: d.library.filter((x) => x.id !== id) }),
+        );
       },
       async replaceLibrary(list) {
-        return run((repo) => repo.replaceLibrary(list), (d) => ({ ...d, library: list }));
+        return run(
+          (repo) => repo.replaceLibrary(list),
+          (d) => ({ ...d, library: list }),
+        );
       },
       async saveSettings(s) {
-        return run((repo) => repo.saveSettings(s), (d) => ({ ...d, settings: s }));
+        return run(
+          (repo) => repo.saveSettings(s),
+          (d) => ({ ...d, settings: s }),
+        );
       },
       async saveDraft(draft) {
         return run(
           (repo) => repo.upsertDraft(draft),
           (d) => ({
             ...d,
-            drafts: d.drafts.some((x) => x.key === draft.key) ? d.drafts.map((x) => (x.key === draft.key ? draft : x)) : [...d.drafts, draft],
+            drafts: d.drafts.some((x) => x.key === draft.key)
+              ? d.drafts.map((x) => (x.key === draft.key ? draft : x))
+              : [...d.drafts, draft],
           }),
           true,
         );
       },
       async deleteDraft(key) {
-        return run((repo) => repo.deleteDraft(key), (d) => ({ ...d, drafts: d.drafts.filter((x) => x.key !== key) }), true);
+        return run(
+          (repo) => repo.deleteDraft(key),
+          (d) => ({ ...d, drafts: d.drafts.filter((x) => x.key !== key) }),
+          true,
+        );
       },
       async resetSection(section) {
-        const ok = await run((repo) => repo.resetSection(section), (d) => d);
+        const ok = await run(
+          (repo) => repo.resetSection(section),
+          (d) => d,
+        );
         if (ok) await load();
         return ok;
       },
@@ -215,8 +290,10 @@ export function BrewStoreProvider({
       data,
       saveState,
       repositoryDescription:
-        repoRef.current?.description ?? "Saved only in this browser's local storage on this device.",
-      repositoryKind: repoRef.current?.kind ?? (factory.current ? "authenticated-backend" : "browser-local"),
+        repoRef.current?.description ??
+        "Saved only in this browser's local storage on this device.",
+      repositoryKind:
+        repoRef.current?.kind ?? (factory.current ? "authenticated-backend" : "browser-local"),
       repository: repoRef.current,
       reload: load,
       actions,

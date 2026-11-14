@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { AuthCard } from "@/components/brew/auth-card";
 import { SocialSignIn } from "@/components/brew/social-sign-in";
 import { supabase } from "@/integrations/supabase/client";
+import { safeAccountPath } from "@/lib/auth-redirect";
 
 const search = z.object({ redirect: z.string().optional() });
 
@@ -26,16 +27,8 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-/** Only same-origin paths are honoured after sign-in. */
 function safePath(target: string | undefined): string {
-  if (!target) return "/";
-  try {
-    const u = new URL(target, window.location.origin);
-    if (u.origin !== window.location.origin || u.pathname.startsWith("/auth")) return "/";
-    return u.pathname + u.search;
-  } catch {
-    return "/";
-  }
+  return safeAccountPath(target, window.location.origin);
 }
 
 function AuthPage() {

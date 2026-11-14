@@ -1,6 +1,7 @@
+import { WhenStoreReady } from "@/components/brew/when-store-ready";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { PageHeader, WhenStoreReady } from "@/components/brew/page";
+import { PageHeader } from "@/components/brew/page";
 import { RecipeForm } from "@/components/brew/recipe-form";
 import { emptyRecipeForm } from "@/domain/recipe";
 import { useBrewStore } from "@/storage/brew-store";
@@ -24,7 +25,11 @@ function NewRecipe() {
   const navigate = useNavigate();
   return (
     <>
-      <PageHeader eyebrow="Recipes" title="New recipe" description="Defaults come from the sheet: 6.5 gal, 70% efficiency, 1.052 target, 90% provisional extract recovery." />
+      <PageHeader
+        eyebrow="Recipes"
+        title="New recipe"
+        description="Defaults come from the sheet: 6.5 gal, 70% efficiency, 1.052 target, 90% provisional extract recovery."
+      />
       <WhenStoreReady>
         <RecipeForm
           initial={emptyRecipeForm()}

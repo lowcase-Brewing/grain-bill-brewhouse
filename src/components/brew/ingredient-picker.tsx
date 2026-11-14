@@ -1,7 +1,14 @@
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatPpg } from "@/domain/format";
 import { isIngredientUsableForCalc } from "@/domain/library";
@@ -14,12 +21,14 @@ export function IngredientPicker({
   onChange,
   invalid,
   id,
+  emptyMessage = "No matching ingredient. Add it in the Malt library.",
 }: {
   library: Ingredient[];
   value: IngredientSnapshot | null;
   onChange: (i: Ingredient) => void;
   invalid?: boolean;
   id?: string;
+  emptyMessage?: string | undefined;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -45,7 +54,7 @@ export function IngredientPicker({
         <Command>
           <CommandInput placeholder="Search malts, adjuncts, extracts…" />
           <CommandList className="max-h-80">
-            <CommandEmpty>No matching ingredient. Add it in the Malt library.</CommandEmpty>
+            <CommandEmpty>{emptyMessage}</CommandEmpty>
             {INGREDIENT_CATEGORIES.map((cat) => {
               const items = library.filter((i) => i.category === cat);
               if (!items.length) return null;
@@ -61,12 +70,24 @@ export function IngredientPicker({
                       }}
                       className="flex items-start gap-2"
                     >
-                      <Check className={cn("mt-0.5 size-4", value?.libraryId === i.id ? "opacity-100" : "opacity-0")} />
+                      <Check
+                        className={cn(
+                          "mt-0.5 size-4",
+                          value?.libraryId === i.id ? "opacity-100" : "opacity-0",
+                        )}
+                      />
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm">{i.name}</div>
                         <div className="truncate text-xs text-muted-foreground">{i.origin}</div>
                       </div>
-                      <span className={cn("tabular text-xs", isIngredientUsableForCalc(i) ? "text-muted-foreground" : "text-destructive")}>
+                      <span
+                        className={cn(
+                          "tabular text-xs",
+                          isIngredientUsableForCalc(i)
+                            ? "text-muted-foreground"
+                            : "text-destructive",
+                        )}
+                      >
                         {formatPpg(i.ppg)} PPG
                       </span>
                     </CommandItem>
