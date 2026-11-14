@@ -1,0 +1,79 @@
+/** Expanded product catalog; the historical sheet remains untouched in seed-malts.ts. */
+import { SEED_MALT_RECORDS, seedIngredientId } from "./seed-malts";
+import { dryToAsIs, type MaltReference } from "./malt-reference";
+import type { Ingredient, IngredientCategory } from "./types";
+
+export const STANDARD_CATALOG_VERSION = "2026-11-14.1";
+export const CATALOG_CHECKED_ON = "2026-11-14";
+const BRIESS_ANALYSIS = "https://brewingwithbriess.com/wp-content/uploads/documents/Briess_TypicalAnalysis_Flyer_Malts.pdf";
+export interface StandardMalt { id: string; active: boolean; ingredient: Ingredient; reference: MaltReference }
+const legacyNames = new Set([
+  "Light Crystal / Caramel", "Medium Crystal / Caramel", "Dark Crystal / Caramel",
+  "Lightly Roasted / Toasted", "Dark Roasted (Bitter)", "Dehusked Dark (Smooth)",
+  "Smoked Malts", "Carapils / Dextrin",
+]);
+const historical: StandardMalt[] = SEED_MALT_RECORDS.map((r) => {
+  const id = seedIngredientId(r.name);
+  const name = r.name === "Flakes Oats" ? "Flaked Oats" : r.name;
+  return { id, active: !legacyNames.has(r.name), ingredient: { ...r, id, name, source: "seed", updatedAt: "2026-11-14T00:00:00Z" }, reference: {
+    manufacturer: "Historical generic reference", product: r.name, aliases: r.name === "Flakes Oats" ? ["Flakes Oats"] : [],
+    group: legacyNames.has(r.name) ? "Legacy broad reference" : r.category,
+    category: r.category, color: "Not specified in historical snapshot", handling: r.category === "Extract" ? "Dissolve in the kettle; extract recovery applies, not grain efficiency." : r.category === "Adjunct" ? "Mash with enzymatically active base malt; not a steep-only gravity source." : "Mash for modeled gravity; verify handling for the actual product.",
+    sourceUrl: "https://docs.google.com/spreadsheets/d/1Pt1-_KuAajbMuQyurMEO_3zRcpQgrYSYx5pL1SHncqA/edit", checkedOn: "2026-11-13",
+    yield: { kind: "historical-estimate", basis: r.category === "Extract" ? "Direct 45 PPG generic planning estimate; unchanged." : "Original generic planning fraction × 46; dry/as-is basis unverified and unchanged." },
+  } };
+});
+interface ProductInput {
+  name: string; manufacturer: string; product?: string; category: IngredientCategory; group?: string;
+  color: string; description: string; handling: string; url: string; aliases?: string[];
+  fraction?: number; ppg?: number; dry?: number; moisture?: number; analysis?: string; basis?: string;
+}
+function product(p: ProductInput): StandardMalt {
+  const id = seedIngredientId(p.name);
+  const fraction = p.category === "Extract" ? null : p.dry !== undefined && p.moisture !== undefined ? dryToAsIs(p.dry, p.moisture) : p.fraction ?? 0.75;
+  const sourced = p.dry !== undefined && p.moisture !== undefined;
+  const basis = p.basis ?? (sourced ? `Fine-grind dry fraction ${p.dry} × (1 − moisture ${p.moisture}) = ${fraction} as-is planning fraction; × 46 gives PPG. ${p.analysis ?? ""}` : p.category === "Extract" ? `Direct ${p.ppg} PPG conservative generic planning estimate, NOT a manufacturer potential specification.` : `Generic as-is planning fraction ${fraction} × 46; NOT a manufacturer yield specification.`);
+  const reference: MaltReference = { manufacturer: p.manufacturer, product: p.product ?? p.name, aliases: p.aliases ?? [], group: p.group ?? p.category, category: p.category, color: p.color, handling: p.handling, sourceUrl: p.url, checkedOn: CATALOG_CHECKED_ON, yield: { kind: sourced ? "manufacturer-analysis" : "generic-estimate", basis, ...(sourced ? { dryFraction: p.dry, moistureFraction: p.moisture } : {}), ...(p.analysis ? { analysis: p.analysis } : {}) } };
+  return { id, active: true, reference, ingredient: { id, name: p.name, category: p.category, origin: p.manufacturer, extractFraction: fraction, ppg: fraction === null ? p.ppg ?? 36 : fraction * 46, flavor: p.description, notes: `${p.handling} ${basis}`, source: "seed", updatedAt: "2026-11-14T00:00:00Z" } };
+}
+const mash = "Mash for gravity; do not assume steep-only extract recovery.";
+const adjunct = "Pre-gelatinized adjunct: mash with sufficient enzymatic base malt; no separate cereal cooking. Not steep-only.";
+const steep = "Briess permits steeping at 150–170°F for about 30 minutes; mash for the modeled planning yield. Steep recovery is not modeled.";
+const additions: ProductInput[] = [
+  { name: "Rye Malt (Briess)", manufacturer: "Briess", category: "Base", color: "3.7 SRM (typical)", description: "Spicy grain character and a rounded, substantial mouthfeel.", handling: "Mash; huskless rye can slow lautering.", url: BRIESS_ANALYSIS, dry: .84, moisture: .045, analysis: "Typical averages, not guaranteed specifications.", aliases: ["Malted rye"] },
+  { name: "Golden Promise (Simpsons)", manufacturer: "Simpsons", category: "Base", color: "4–6 EBC; 2.1–2.8 °Lovibond", description: "Sweet, clean Scottish pale malt with a gentle full malt foundation.", handling: "Enzymatic base malt; mash.", url: "https://www.simpsonsmalt.co.uk/our-malts/base-malts/finest-pale-ale-golden-promise/", dry: .81, moisture: .037, analysis: "Minimum DB extract with maximum moisture: conservative bound combination, not a paired typical analysis. IoB 306 L°/kg is NOT used as a percentage." },
+  { name: "Brown Malt (Crisp)", manufacturer: "Crisp", category: "Specialty", color: "Awaiting verified product color specification", description: "Dry toasted bread and roast depth for porters and darker ales.", handling: mash, url: "https://crispmalt.com/our-malts/", fraction: .70, aliases: ["Crisp Brown"] },
+  { name: "Pale/Low Colour Chocolate Malt (Crisp)", manufacturer: "Crisp", category: "Specialty", color: "Awaiting verified product color specification", description: "Lighter chocolate roast for cocoa and soft coffee accents.", handling: mash, url: "https://crispmalt.com/our-malts/", fraction: .70, aliases: ["Pale Chocolate", "Low Colour Chocolate"] },
+  { name: "Chocolate Malt (Crisp)", manufacturer: "Crisp", category: "Specialty", color: "Awaiting verified product color specification", description: "Dark cocoa and roasted coffee with a firm roast finish.", handling: mash, url: "https://crispmalt.com/our-malts/", fraction: .70 },
+  { name: "Black Malt (Briess)", manufacturer: "Briess", category: "Specialty", color: "500 SRM (typical)", description: "Deep dark color with roasted coffee character; malted barley, not roasted unmalted barley.", handling: steep, url: BRIESS_ANALYSIS, fraction: .65, analysis: "Official typical-analysis table omits extract yield for this roasted product." },
+  { name: "Victory Malt (Briess)", manufacturer: "Briess", category: "Specialty", color: "28 SRM (typical)", description: "Warm biscuit, nutty toast and browned crust.", handling: steep, url: BRIESS_ANALYSIS, dry: .75, moisture: .025, analysis: "Typical averages, not guarantees.", aliases: ["Victory"] },
+  { name: "Biscuit Malt (Dingemans)", manufacturer: "Dingemans", category: "Specialty", color: "Awaiting verified product color specification", description: "Dry biscuit and toasted bread without caramel sweetness.", handling: mash, url: "https://www.dingemansmout.be/", fraction: .75, aliases: ["Biscuit"] },
+  { name: "Special B (Dingemans)", manufacturer: "Dingemans", product: "Special B MD", category: "Specialty", group: "Crystal", color: "270–350 EBC (specification)", description: "Dark raisin, burnt sugar and rich caramel complexity.", handling: "Mash; manufacturer suggests up to 15% of the bill. Steep-only yield is not established by this sheet.", url: "https://dingemansmout.be/sites/default/files/downloads/specs/Specifications%20SPECIAL%20B%C2%AE%20MD.pdf", dry: .72, moisture: .05, analysis: "Minimum dry-matter fine extract and maximum moisture, conservative bound combination, not typical paired analysis." },
+  { name: "Melanoidin Malt (Weyermann)", manufacturer: "Weyermann", category: "Specialty", color: "Awaiting verified product color specification", description: "Concentrated malty bread-crust character for a rich malt center.", handling: mash, url: "https://www.weyermann.de/en-gb/products/brewery/", fraction: .75 },
+  { name: "Aromatic Malt (Dingemans)", manufacturer: "Dingemans", category: "Specialty", color: "Awaiting verified product color specification", description: "Intense malt aroma and rounded toasted bread notes.", handling: mash, url: "https://www.dingemansmout.be/", fraction: .75 },
+  { name: "Golden Naked Oats (Simpsons)", manufacturer: "Simpsons", category: "Specialty", color: "Awaiting verified product color specification", description: "Huskless oat specialty malt with soft nutty sweetness and body; not raw flaked oats.", handling: mash, url: "https://www.simpsonsmalt.co.uk/our-malts/special-malts/golden-naked-oats/", fraction: .72, aliases: ["GNO"] },
+  ...([ [20, .76, .06], [40, .77, .055], [60, .77, .05], [80, .76, .045], [120, .75, .03] ] as const).map(([l,dry,moisture]) => ({ name: `Briess Caramel/Crystal ${l}L`, manufacturer: "Briess", product: `Caramel Malt ${l}L`, category: "Specialty" as const, group: "Crystal", color: `${l} SRM (typical; product name ${l}L)`, description: l <= 40 ? "Caramel sweetness and golden-to-copper malt accents." : l < 100 ? "Toffee and richer caramel for a full malt middle." : "Dark caramel, burnt sugar and dried-fruit accents.", handling: steep, url: BRIESS_ANALYSIS, dry, moisture, analysis: "Typical averages, not guarantees.", aliases: [`Crystal ${l}L`, `Caramel ${l}L`] })),
+  { name: "Beechwood Smoked Malt (Weyermann)", manufacturer: "Weyermann", category: "Specialty", group: "Smoke", color: "Awaiting verified product color specification", description: "Wood-fired smoke with savory campfire character; not peated malt.", handling: "Mash with enzymatic malt. Smoke intensity is product-specific, not interchangeable with peat.", url: "https://www.weyermann.de/en-gb/products/brewery/", fraction: .78, aliases: ["Rauchmalz", "Beech smoked"] },
+  { name: "Peated Malt (Crisp)", manufacturer: "Crisp", category: "Specialty", group: "Smoke", color: "Awaiting verified product color specification", description: "Distinct earthy peat smoke; a different flavor and intensity from beechwood smoke.", handling: "Mash; dose cautiously and verify phenol level for the actual product.", url: "https://crispmalt.com/our-malts/", fraction: .78, aliases: ["Peat smoked"] },
+  { name: "Carapils (Briess)", manufacturer: "Briess", category: "Specialty", group: "Dextrin", color: "1.5 SRM (typical)", description: "Low-color body and foam contribution; distinct from Weyermann Carafoam.", handling: steep, url: "https://brewingwithbriess.com/wp-content/uploads/documents/Briess-PISB-Carapils-Malt.pdf", dry: .75, moisture: .065, analysis: "Typical averages, not guarantees.", aliases: ["Briess Carapils"] },
+  { name: "Carafoam (Weyermann)", manufacturer: "Weyermann", category: "Specialty", group: "Dextrin", color: "Awaiting verified product color specification", description: "Pale foam-and-body specialty malt; separate product from Briess Carapils.", handling: mash, url: "https://www.weyermann.de/en-gb/products/brewery/", fraction: .73, aliases: ["Weyermann Carafoam"] },
+  { name: "Carafa Special II (Weyermann)", manufacturer: "Weyermann", category: "Specialty", group: "Dehusked dark", color: "Awaiting verified SPECIAL II specification (not ordinary CARAFA II)", description: "Dehusked dark barley malt for smooth roast and dark color.", handling: "Mash; verify SPECIAL II sheet, not ordinary CARAFA Type II. Separate from Midnight Wheat.", url: "https://www.weyermann.de/en-gb/products/brewery/", fraction: .65, aliases: ["Carafa Special 2"] },
+  { name: "Midnight Wheat (Briess)", manufacturer: "Briess", category: "Specialty", group: "Dehusked dark", color: "550 SRM (typical)", description: "Huskless dark wheat malt with smooth color and restrained roast bite; not Carafa.", handling: steep, url: BRIESS_ANALYSIS, fraction: .65, analysis: "Official typical-analysis table omits extract yield for this product." },
+  { name: "Flaked Barley (Briess)", manufacturer: "Briess", category: "Adjunct", color: "Awaiting verified product color specification", description: "Unmalted barley flakes for grain texture, body and foam.", handling: adjunct, url: "https://brewingwithbriess.com/products/", fraction: .72 },
+  { name: "Flaked/Torrefied Rice (Crisp)", manufacturer: "Crisp", product: "Flaked Torrefied Rice", category: "Adjunct", color: "Not stated in inspected product page", description: "Light, neutral rice adjunct to reduce malt flavor and body.", handling: adjunct, url: "https://crispmalt.com/en-us/malts/flaked-torrefied-rice/", fraction: .80, analysis: "Page lists 80.6% / 305 L°/kg with unclear basis; neither is treated as verified as-is percentage.", aliases: ["Flaked Rice", "Torrefied Rice"] },
+  { name: "Flaked Rye (Briess)", manufacturer: "Briess", category: "Adjunct", color: "Awaiting verified product color specification", description: "Unmalted rye flakes for spicy grain character and a fuller texture.", handling: adjunct, url: "https://brewingwithbriess.com/products/", fraction: .75 },
+  ...([
+    ["Golden/Pale Light LME", "Golden Light", "LME", "Pale neutral malt wort for a clean malt base.", ["Golden Light LME", "Pale Light LME"]],
+    ["Wheat DME", "Bavarian Wheat", "DME", "65% malted wheat / 35% malted barley grain composition; not pure wheat.", ["Bavarian Wheat DME"]],
+    ["Wheat LME", "Bavarian Wheat", "LME", "65% malted wheat / 35% malted barley grain composition; not pure wheat.", ["Bavarian Wheat LME"]],
+    ["Pilsen Light DME", "Pilsen Light", "DME", "Very pale concentrated wort with a delicate malt base.", []],
+    ["Pilsen Light LME", "Pilsen Light", "LME", "Very pale liquid wort concentrate with a delicate malt base.", []],
+    ["Amber DME", "Sparkling Amber", "DME", "Amber concentrated wort for toasty and caramel malt accents.", ["Sparkling Amber DME"]],
+    ["Amber LME", "Sparkling Amber", "LME", "Amber liquid wort concentrate for toasty and caramel malt accents.", ["Sparkling Amber LME"]],
+  ] as const).map(([name, identity, form, description, aliases]) => ({ name: `${name} (Briess)`, manufacturer: "Briess", product: `CBW ${identity} ${form}`, category: "Extract" as const, group: `${form === "DME" ? "Dry" : "Liquid"} extract`, color: identity === "Bavarian Wheat" ? "3.0 SRM at 8° Plato (typical)" : "Awaiting verified product color specification", description, handling: `${form === "DME" ? "Dry powder" : "Liquid syrup"}; unhopped, nondiastatic wort concentrate. Dissolve in kettle; extract recovery only, no mash enzymes.`, url: identity === "Bavarian Wheat" ? `https://brewingwithbriess.com/wp-content/uploads/documents/Briess-PISB-CBW-Bavarian-Wheat-${form}.pdf` : "https://brewingwithbriess.com/products/extracts/", ppg: form === "DME" ? 44 : 36, aliases: [...aliases], analysis: identity === "Bavarian Wheat" ? `Typical solids ${form === "DME" ? "97%" : "79%"}; solids are not an official PPG specification. 75% fermentability is not yield.` : "Potential/solids not independently verified; conservative direct PPG estimate." })),
+];
+export const STANDARD_CATALOG: readonly StandardMalt[] = [...historical, ...additions.map(product)];
+export const ACTIVE_STANDARD_CATALOG = STANDARD_CATALOG.filter((i) => i.active);
+export const LEGACY_STANDARD_CATALOG = STANDARD_CATALOG.filter((i) => !i.active);
+export function standardReference(id: string): StandardMalt | undefined { return STANDARD_CATALOG.find((i) => i.id === id); }
+export function activeStandardLibrary(now: string): Ingredient[] { return ACTIVE_STANDARD_CATALOG.map((i) => ({ ...i.ingredient, updatedAt: now })); }
