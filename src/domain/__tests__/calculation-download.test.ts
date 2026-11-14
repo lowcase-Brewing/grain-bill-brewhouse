@@ -13,7 +13,7 @@ describe("public calculation download", () => {
     expect(text).toContain("Mashed grain load: 9 lb");
     expect(text).toContain("DME — Pale / Light (Unhopped) (Extract)");
     expect(text).toContain("Extract recovery: 90% (provisional, not measured)");
-    expect(text).toContain("Standard reference version: 2026-11-13");
+    expect(text).toContain("Standard reference version: 2026-11-14.1");
     expect(text).not.toMatch(/owner_id|access_token|docs.google.com/);
   });
   it("labels invalid work incomplete and never exports the old valid result", () => {

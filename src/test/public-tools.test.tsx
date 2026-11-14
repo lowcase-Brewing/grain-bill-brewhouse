@@ -125,11 +125,11 @@ describe("public tools without account or storage access", () => {
 
   it("searches only the standard library and does not offer editing to guests", async () => {
     await openRoute("/tools/malts");
-    expect(await screen.findByText("23 of 23 ingredients")).toBeVisible();
+    expect(await screen.findByText("48 of 48 ingredients")).toBeVisible();
     fireEvent.change(screen.getByLabelText("Search the reference"), {
       target: { value: "Vienna" },
     });
-    expect(screen.getByText("1 of 23 ingredients")).toBeVisible();
+    expect(screen.getByText("1 of 48 ingredients")).toBeVisible();
     expect(screen.getByRole("heading", { name: "Vienna Malt" })).toBeVisible();
     expect(
       screen.queryByRole("button", { name: /Add ingredient|Edit|Delete/ }),
@@ -137,7 +137,7 @@ describe("public tools without account or storage access", () => {
     fireEvent.change(screen.getByLabelText("Category"), { target: { value: "Extract" } });
     expect(screen.getByText("No matching ingredients.")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Reset filters" }));
-    expect(screen.getByText("23 of 23 ingredients")).toBeVisible();
+    expect(screen.getByText("48 of 48 ingredients")).toBeVisible();
   });
 
   it.each([
