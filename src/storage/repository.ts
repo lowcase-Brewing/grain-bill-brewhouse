@@ -5,6 +5,13 @@
  */
 import type { AppSettings, CalculatorDraft, Ingredient, Recipe } from "@/domain/types";
 
+export interface LibraryAdditionResult {
+  insertedIds: string[];
+  skippedIds: string[];
+  failed: { id: string; message: string }[];
+  library: Ingredient[];
+}
+
 export type SectionKey = "recipes" | "library" | "settings" | "drafts";
 
 export type SectionIssueKind = "unreadable-json" | "invalid-shape" | "unsupported-version";
@@ -40,6 +47,7 @@ export interface BrewRepository {
   upsertRecipe(recipe: Recipe): Promise<void>;
   deleteRecipe(id: string): Promise<void>;
   upsertIngredient(ingredient: Ingredient): Promise<void>;
+  addStandardIngredients(selectedIds: string[]): Promise<LibraryAdditionResult>;
   deleteIngredient(id: string): Promise<void>;
   replaceLibrary(list: Ingredient[]): Promise<void>;
   saveSettings(settings: AppSettings): Promise<void>;

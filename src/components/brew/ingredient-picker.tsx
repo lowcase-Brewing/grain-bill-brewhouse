@@ -12,6 +12,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatPpg } from "@/domain/format";
 import { isIngredientUsableForCalc } from "@/domain/library";
+import { ingredientSearchText } from "@/domain/library-updates";
+import { standardReference } from "@/domain/standard-malts";
 import { INGREDIENT_CATEGORIES, type Ingredient, type IngredientSnapshot } from "@/domain/types";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +65,7 @@ export function IngredientPicker({
                   {items.map((i) => (
                     <CommandItem
                       key={i.id}
-                      value={`${i.name} ${i.origin} ${i.category} ${i.id}`}
+                      value={`${ingredientSearchText(i)} ${i.id}`}
                       onSelect={() => {
                         onChange(i);
                         setOpen(false);
@@ -78,7 +80,7 @@ export function IngredientPicker({
                       />
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm">{i.name}</div>
-                        <div className="truncate text-xs text-muted-foreground">{i.origin}</div>
+                        <div className="truncate text-xs text-muted-foreground">{i.origin}{standardReference(i.id)?.active === false ? " · Legacy reference" : ""}</div>
                       </div>
                       <span
                         className={cn(

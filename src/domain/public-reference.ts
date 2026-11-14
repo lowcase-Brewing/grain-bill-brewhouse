@@ -1,9 +1,10 @@
 import { seedLibrary } from "./library";
+import { STANDARD_CATALOG_VERSION } from "./standard-malts";
 
 /** Reviewed standard reference snapshot; never read from an account repository. */
-export const PUBLIC_REFERENCE_VERSION = "2026-11-13";
+export const PUBLIC_REFERENCE_VERSION = STANDARD_CATALOG_VERSION;
 export const PUBLIC_REFERENCE_LIBRARY = seedLibrary(
-  `${PUBLIC_REFERENCE_VERSION}T00:00:00.000Z`,
+  "2026-11-14T00:00:00.000Z",
 ).map((ingredient) => ({
   ...ingredient,
   // Public reference prose omits project notes and orphaned sheet footnotes.
