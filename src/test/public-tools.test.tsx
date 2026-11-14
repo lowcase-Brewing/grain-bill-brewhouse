@@ -19,6 +19,12 @@ vi.mock("@/integrations/supabase/client", () => ({
   ),
 }));
 
+// Simulate the local-only rehearsal regardless of this environment's backend config.
+vi.mock("@/lib/backend-config", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/backend-config")>()),
+  accountBackendEnabled: false,
+}));
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
