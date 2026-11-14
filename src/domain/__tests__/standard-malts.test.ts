@@ -56,7 +56,7 @@ describe("expanded catalog rules", () => {
     expect(newEntries.filter((i) => i.reference.yield.kind === "manufacturer-analysis")).toHaveLength(20);
     expect(newEntries.filter((i) => i.reference.yield.kind === "generic-estimate")).toHaveLength(13);
     for (const i of newEntries) {
-      expect(i.reference.sourceUrl.startsWith("https://")).toBe(true);
+      expect(i.reference.sourceUrl?.startsWith("https://")).toBe(true);
       expect(i.reference.checkedOn).toBe("2026-11-14");
       if (i.reference.yield.kind === "generic-estimate") expect(i.reference.yield.basis).toMatch(/NOT a manufacturer/);
     }

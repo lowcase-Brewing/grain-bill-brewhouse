@@ -7,7 +7,7 @@ export interface MaltReference {
   group: string;
   color: string;
   handling: string;
-  sourceUrl: string;
+  sourceUrl: string | null;
   checkedOn: string;
   yield: {
     kind: "manufacturer-analysis" | "generic-estimate" | "historical-estimate";

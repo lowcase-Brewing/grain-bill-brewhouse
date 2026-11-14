@@ -4,7 +4,7 @@ import { LocalBrewRepository, STORAGE_KEYS, type KeyValueStore } from "../local-
 import { CloudBrewRepository } from "../cloud-repository";
 import { BrewStoreProvider } from "../brew-store";
 import { LibraryUpdates } from "@/components/brew/library-updates";
-import { seedLibrary } from "@/domain/library";
+import { seedLibrary, historicalSheetLibrary } from "@/domain/library";
 import { selectedStandardAdditions } from "@/domain/library-updates";
 import type { Ingredient } from "@/domain/types";
 
@@ -120,5 +120,29 @@ describe("selected insert-only updates", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "Add selected ingredients (1)" }));
     await waitFor(() => expect(screen.getByText(/1 added; 0 already present/)).toBeVisible());
     expect(JSON.parse(map.get(STORAGE_KEYS.library) ?? "{}").data.map((i: Ingredient) => i.id)).toEqual([malt.id]);
+  });
+
+  it("reviews reference details and adds a selected product without overwriting a customized historical library", async () => {
+    const { store } = memory();
+    const repo = new LocalBrewRepository(store, () => now);
+    const old = historicalSheetLibrary(now).map((i, index) => index === 0
+      ? { ...i, name: "My Maris lot", ppg: 23, extractFraction: .5, notes: "Keep my notes" }
+      : i);
+    await repo.loadAll(); await repo.replaceLibrary(old);
+    render(<BrewStoreProvider createRepository={() => repo}><LibraryUpdates/></BrewStoreProvider>);
+    fireEvent.click(await screen.findByRole("button", { name: "Review library updates (33)" }));
+    const dialog = screen.getByRole("dialog");
+    const checkbox = within(dialog).getByRole("checkbox", { name: /Rye Malt \(Briess\)/ });
+    const row = checkbox.closest("li");
+    if (!row) throw new Error("Missing Rye update row");
+    fireEvent.click(within(row).getByText("Product & yield details"));
+    expect(within(row).getByRole("link", { name: /Official product reference/ })).toHaveAttribute("href", "https://brewingwithbriess.com/wp-content/uploads/documents/Briess_TypicalAnalysis_Flyer_Malts.pdf");
+    fireEvent.click(checkbox);
+    fireEvent.click(within(dialog).getByRole("button", { name: "Add selected ingredients (1)" }));
+    await screen.findByText(/1 added; 0 already present/);
+    const saved = (await repo.loadAll()).library;
+    expect(saved).toHaveLength(24);
+    for (const prior of old) expect(saved.find((i) => i.id === prior.id)).toEqual(prior);
+    expect(saved.find((i) => i.name === "Rye Malt (Briess)")?.ppg).toBe(.84 * .955 * 46);
   });
 });

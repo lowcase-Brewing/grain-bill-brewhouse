@@ -140,6 +140,24 @@ describe("public tools without account or storage access", () => {
     expect(screen.getByText("48 of 48 ingredients")).toBeVisible();
   });
 
+  it("keeps raw history, private sheet links and project prose out of the public reference", async () => {
+    await openRoute("/tools/malts");
+    await screen.findByText("48 of 48 ingredients");
+    expect(document.querySelector('a[href*="docs.google.com/spreadsheets"]')).toBeNull();
+    expect(document.body.textContent).not.toMatch(/Historical Google Sheet reference|Novena Noche|\[1\]/);
+    expect(screen.queryByText("Smoked Malts", { exact: true })).not.toBeInTheDocument();
+    const card = screen.getByRole("heading", { name: "Rye Malt (Briess)" }).closest("article");
+    if (!card) throw new Error("Missing Rye card");
+    const details = card.querySelector("details");
+    if (!details) throw new Error("Missing yield details");
+    expect(details).not.toHaveAttribute("open");
+    expect(details.textContent).toContain("Fine-grind dry fraction 0.84");
+    const outsideDetails = card.cloneNode(true) as HTMLElement;
+    outsideDetails.querySelector("details")?.remove();
+    expect(outsideDetails.textContent).toContain("Mash; huskless rye can slow lautering.");
+    expect(outsideDetails.textContent).not.toContain("Fine-grind dry fraction");
+  });
+
   it.each([
     "/workbench",
     "/calculator",
