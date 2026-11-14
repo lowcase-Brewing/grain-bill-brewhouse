@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useBrewStore } from "@/storage/brew-store";
 
 export function PageHeader({
   eyebrow,
@@ -26,7 +24,19 @@ export function PageHeader({
   );
 }
 
-export function Panel({ className, children, title, description, actions }: { className?: string; children: ReactNode; title?: ReactNode; description?: ReactNode; actions?: ReactNode }) {
+export function Panel({
+  className,
+  children,
+  title,
+  description,
+  actions,
+}: {
+  className?: string;
+  children: ReactNode;
+  title?: ReactNode;
+  description?: ReactNode;
+  actions?: ReactNode;
+}) {
   return (
     <section className={cn("rounded-xl border border-border bg-card shadow-card", className)}>
       {(title || actions) && (
@@ -43,27 +53,13 @@ export function Panel({ className, children, title, description, actions }: { cl
   );
 }
 
-/** Renders children only after browser storage has loaded (nothing is read during SSR). */
-export function WhenStoreReady({ children }: { children: ReactNode }) {
-  const { status } = useBrewStore();
-  if (status === "unavailable")
-    return (
-      <div className="rounded-xl border border-destructive/30 bg-destructive-soft p-6 text-sm text-destructive">
-        This browser isn't allowing local storage (private mode or blocked site data), so nothing can be saved here.
-      </div>
-    );
-  if (status === "loading")
-    return (
-      <div className="space-y-4" aria-busy>
-        <Skeleton className="h-9 w-64" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-48 w-full" />
-      </div>
-    );
-  return <>{children}</>;
-}
-
-export function FieldError({ message, id }: { message?: string | null | false | undefined; id?: string }) {
+export function FieldError({
+  message,
+  id,
+}: {
+  message?: string | null | false | undefined;
+  id?: string;
+}) {
   if (!message) return null;
   return (
     <p id={id} className="text-xs text-destructive">

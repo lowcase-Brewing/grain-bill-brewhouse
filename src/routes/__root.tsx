@@ -5,6 +5,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
+  redirect,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -15,6 +17,8 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { accountBackendEnabled, isPublicToolsPath } from "@/lib/backend-config";
+import { takePasswordSetupCallback } from "@/lib/auth-callback";
 
 function NotFoundComponent() {
   return (
@@ -39,10 +43,14 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
-  console.error(error);
+  if (typeof window === "undefined" || !isPublicToolsPath(window.location.pathname))
+    console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    // Public diagnostics never include thrown input values or calculation state.
+    if (!isPublicToolsPath(window.location.pathname)) {
+      reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    }
   }, [error]);
 
   return (
@@ -77,15 +85,37 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: ({ location }) => {
+    if (location.pathname === "/reset-password") return;
+    const callback = takePasswordSetupCallback();
+    if (callback)
+      throw redirect({
+        to: "/reset-password",
+        // Keep the same-origin fragment until the auth client consumes the link.
+        hash: location.hash,
+        search: {
+          mode: callback.type === "invite" ? "invite" : "recovery",
+          error: callback.error ?? undefined,
+        },
+      });
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "lowcase Brewing" },
-      { name: "description", content: "Private brewing workbench for recipes and grain bills." },
+      {
+        name: "description",
+        content:
+          "Brewing tools for everyone. A private recipe workbench for invited beta accounts.",
+      },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "lowcase Brewing" },
-      { property: "og:description", content: "Private brewing workbench for recipes and grain bills." },
+      {
+        property: "og:description",
+        content:
+          "Brewing tools for everyone. A private recipe workbench for invited beta accounts.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -123,8 +153,10 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   useEffect(() => {
+    if (!accountBackendEnabled || isPublicToolsPath(pathname)) return;
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         void router.navigate({ to: "/reset-password", search: { mode: "recovery" } });
@@ -135,7 +167,7 @@ function RootComponent() {
       if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
     });
     return () => data.subscription.unsubscribe();
-  }, [router, queryClient]);
+  }, [router, queryClient, pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
