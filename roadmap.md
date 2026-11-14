@@ -1,6 +1,7 @@
 # QA roadmap
 
-- [ ] Add Apple and Google sign-in alongside email/password, preserve invite-only access, and verify sign-in controls.
+- [x] Add Apple and Google sign-in alongside email/password and verify controls, session boundaries, and mobile display (103 tests passed).
+- [ ] Restore invite-only hosted registration: live settings currently report disable_signup=false; owner must enable Disable sign-up in More → Users → Auth settings because the available tool cannot preserve unreadable email-security settings. Real Apple/Google account sign-in remains unverified.
 
 - [x] Apply only missing fixes from the tested recovery patch, then verify tests, typecheck, production build, fresh preview, mobile menu, actual commit, and credit usage without enabling Cloud/auth or publishing.
 
