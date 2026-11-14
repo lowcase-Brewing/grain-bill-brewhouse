@@ -11,7 +11,10 @@ import { IngredientDialog } from "@/components/brew/ingredient-dialog";
 import { PageHeader } from "@/components/brew/page";
 import { formatPpg } from "@/domain/format";
 import { isIngredientUsableForCalc } from "@/domain/library";
-import { SHEET_SOURCE } from "@/domain/seed-malts";
+import { standardReference } from "@/domain/standard-malts";
+import { ingredientSearchText } from "@/domain/library-updates";
+import { MaltDetails } from "@/components/brew/malt-details";
+import { LibraryUpdates } from "@/components/brew/library-updates";
 import { INGREDIENT_CATEGORIES, type Ingredient, type IngredientCategory } from "@/domain/types";
 import { cn } from "@/lib/utils";
 import { newId, nowIso, useBrewStore } from "@/storage/brew-store";
@@ -22,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/malts")({
       { title: "Malt library · lowcase Brewing" },
       {
         name: "description",
-        content: "Editable malt, adjunct and extract library seeded from the lowcase sheet.",
+        content: "Private editable ingredient library with reviewed standard catalog additions.",
       },
       { property: "og:title", content: "Malt library · lowcase Brewing" },
       {
@@ -46,8 +49,7 @@ function MaltsPage() {
         title="Malt library"
         description={
           <>
-            Seeded from the Malt Library tab ({SHEET_SOURCE.sync}, fetched {SHEET_SOURCE.fetchedOn}
-            ). Values are generic planning estimates —{" "}
+            Your own malt, adjunct and extract library. Potentials are planning values —{" "}
             <strong className="font-semibold text-foreground">
               not measured specs for your system or a specific product lot.
             </strong>
@@ -65,6 +67,7 @@ function MaltsPage() {
         }
       />
       <WhenStoreReady>
+        <div className="mb-5"><LibraryUpdates/></div>
         <Library
           onEdit={(i) => {
             setEditing(i);
@@ -95,6 +98,7 @@ function DialogHost({
       library={data?.library ?? []}
       onSave={async (r) => {
         const item: Ingredient = {
+          ...editing,
           ...r.value,
           id: editing?.id ?? `user-${newId()}`,
           source: editing?.source ?? "user",
@@ -121,7 +125,7 @@ function Library({ onEdit }: { onEdit: (i: Ingredient) => void }) {
     (i) =>
       (cat === "All" || i.category === cat) &&
       (!needle ||
-        [i.name, i.origin, i.flavor, i.notes].some((s) => s.toLowerCase().includes(needle))),
+        ingredientSearchText(i).includes(needle) || i.notes.toLowerCase().includes(needle)),
   );
   const usedBy = (id: string) =>
     data.recipes.filter((r) => r.grainBill.some((row) => row.ingredient?.libraryId === id)).length;
@@ -190,12 +194,14 @@ function Library({ onEdit }: { onEdit: (i: Ingredient) => void }) {
                 {i.extractFraction === null ? "PPG direct" : `fraction ${i.extractFraction} × 46`}
               </Badge>
               {i.source === "user" && <Badge variant="success">Custom</Badge>}
+              {standardReference(i.id)?.active === false && <Badge variant="outline">Legacy reference</Badge>}
               {!isIngredientUsableForCalc(i) && (
                 <Badge variant="danger">PPG must be &gt; 0 to calculate</Badge>
               )}
             </div>
             {i.flavor && <p className="mt-3 text-sm">{i.flavor}</p>}
             {i.notes && <p className="mt-2 text-xs italic text-muted-foreground">{i.notes}</p>}
+            <MaltDetails id={i.id}/>
             <div className="mt-auto flex justify-end gap-1 pt-3">
               <Button variant="ghost" size="sm" onClick={() => onEdit(i)}>
                 <Pencil /> Edit

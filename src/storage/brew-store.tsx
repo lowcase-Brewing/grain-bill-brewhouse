@@ -26,7 +26,7 @@ import type {
   Recipe,
 } from "@/domain/types";
 import { LocalBrewRepository, STORAGE_KEYS } from "./local-repository";
-import type { BrewRepository, RepositorySnapshot, SectionKey } from "./repository";
+import type { BrewRepository, LibraryAdditionResult, RepositorySnapshot, SectionKey } from "./repository";
 
 export type SaveState = "idle" | "saving" | "saved" | "error" | "blocked";
 
@@ -45,6 +45,7 @@ interface BrewStoreValue {
     duplicateRecipe(id: string): Promise<Recipe | null>;
     importRecipe(recipe: Recipe): Promise<Recipe | null>;
     saveIngredient(i: Ingredient): Promise<boolean>;
+    addStandardIngredients(ids: string[]): Promise<LibraryAdditionResult | null>;
     deleteIngredient(id: string): Promise<boolean>;
     replaceLibrary(list: Ingredient[]): Promise<boolean>;
     saveSettings(s: AppSettings): Promise<boolean>;
@@ -234,6 +235,12 @@ export function BrewStoreProvider({
               : [...d.library, i],
           }),
         );
+      },
+      async addStandardIngredients(ids) {
+        let result: LibraryAdditionResult | null = null;
+        const ok = await run(async (repo) => { result = await repo.addStandardIngredients(ids); },
+          (d) => ({ ...d, library: result?.library ?? d.library }));
+        return ok ? result : null;
       },
       async deleteIngredient(id) {
         return run(

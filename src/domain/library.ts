@@ -1,6 +1,7 @@
 /** Malt Library rules: PPG derivation, validation, uniqueness, snapshots. */
 import { parseNumberInput } from "./numbers";
 import { SEED_MALT_RECORDS, seedIngredientId, type SeedMaltRecord } from "./seed-malts";
+import { activeStandardLibrary } from "./standard-malts";
 import {
   INGREDIENT_CATEGORIES,
   type Ingredient,
@@ -144,6 +145,11 @@ export function seedRecordToIngredient(r: SeedMaltRecord, now: string): Ingredie
 }
 
 export function seedLibrary(now: string): Ingredient[] {
+  return activeStandardLibrary(now);
+}
+
+/** Historical 23-row Google Sheet snapshot, unchanged. */
+export function historicalSheetLibrary(now: string): Ingredient[] {
   return SEED_MALT_RECORDS.map((r) => seedRecordToIngredient(r, now));
 }
 

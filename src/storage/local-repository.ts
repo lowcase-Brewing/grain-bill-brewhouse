@@ -1,5 +1,6 @@
 /** localStorage-backed repository with versioned, validated envelopes per section. */
 import { seedLibrary } from "@/domain/library";
+import { selectedStandardAdditions } from "@/domain/library-updates";
 import {
   SCHEMA_VERSION,
   draftsEnvelope,
@@ -150,6 +151,17 @@ export class LocalBrewRepository implements BrewRepository {
     const next = s.library.filter((x) => x.id !== id);
     this.write("library", next);
     s.library = next;
+  }
+  async addStandardIngredients(ids: string[]) {
+    // Read fresh persisted state before planning, never rely on a stale preview.
+    const fresh = await this.loadAll();
+    if (this.blocked.has("library")) throw new StorageBlockedError("library");
+    const additions = selectedStandardAdditions(fresh.library, ids, this.now());
+    const library = [...fresh.library, ...additions];
+    this.write("library", library);
+    this.snap().library = library;
+    const insertedIds = additions.map((i) => i.id);
+    return { insertedIds, skippedIds: ids.filter((id) => !insertedIds.includes(id)), failed: [], library };
   }
   async replaceLibrary(list: Ingredient[]) {
     const s = this.snap();

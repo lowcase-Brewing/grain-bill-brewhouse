@@ -164,7 +164,7 @@ function Body() {
             <ConfirmButton
               trigger={<Button variant="outline">Restore seed malt library</Button>}
               title="Restore the seed malt library?"
-              description="Replaces the library with the 23 sheet entries. Custom ingredients and edits are removed. Saved recipes keep their snapshots."
+              description="Replaces the library with the active 48 standard entries. Custom ingredients and edits are removed. Saved recipes keep their snapshots. For additions without replacement, use Review library updates in the Malt library."
               confirmLabel="Restore"
               onConfirm={async () => {
                 if (await actions.replaceLibrary(seedLibrary(nowIso())))

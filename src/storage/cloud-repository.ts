@@ -8,12 +8,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ZodTypeAny } from "zod";
 import { seedLibrary } from "@/domain/library";
+import { selectedStandardAdditions } from "@/domain/library-updates";
 import { SCHEMA_VERSION, appSettingsSchema, calculatorDraftSchema, ingredientSchema, recipeSchema } from "@/domain/schema";
 import type { AppSettings, CalculatorDraft, Ingredient, Recipe } from "@/domain/types";
 import type { Database } from "@/integrations/supabase/types";
 import { defaultSettings } from "./local-repository";
 import { planLegacyImport, type ImportPlan, type LegacyData } from "./legacy-import";
-import { StorageBlockedError, type BrewRepository, type RepositorySnapshot, type SectionIssue, type SectionKey } from "./repository";
+import { StorageBlockedError, type BrewRepository, type LibraryAdditionResult, type RepositorySnapshot, type SectionIssue, type SectionKey } from "./repository";
 
 type Client = SupabaseClient<Database>;
 type Json = never;
@@ -132,6 +133,34 @@ export class CloudBrewRepository implements BrewRepository {
   deleteIngredient(id: string) {
     return this.serial(async () => {
       check(await this.client.from("brew_ingredients").delete().eq("owner_id", this.userId).eq("id", id));
+    });
+  }
+  addStandardIngredients(ids: string[]): Promise<LibraryAdditionResult> {
+    return this.serial(async () => {
+      this.guard("library");
+      const readLibrary = async () => {
+        const issues: SectionIssue[] = [];
+        const current = this.parseRows<Ingredient>("library", rows(await this.client.from("brew_ingredients").select("doc,schema_version").eq("owner_id", this.userId)), ingredientSchema, issues);
+        this.guard("library");
+        return current;
+      };
+      const current = await readLibrary();
+      const additions = selectedStandardAdditions(current, ids, stamp());
+      const result: LibraryAdditionResult = { insertedIds: [], skippedIds: ids.filter((id) => !additions.some((i) => i.id === id)), failed: [], library: current };
+      for (const i of additions) {
+        await this.assertSession();
+        // Recheck names/aliases between inserts; deterministic id conflicts are
+        // ignored by the database, never updated. No load/login reseeding.
+        const fresh = await readLibrary();
+        if (!selectedStandardAdditions(fresh, [i.id], stamp()).length) { result.skippedIds.push(i.id); continue; }
+        const res = await this.client.from("brew_ingredients").upsert({ owner_id: this.userId, id: i.id, doc: i as Json, schema_version: SCHEMA_VERSION }, { onConflict: "owner_id,id", ignoreDuplicates: true }).select("id");
+        if (res.error) result.failed.push({ id: i.id, message: res.error.message });
+        else if (res.data?.some((row) => row.id === i.id)) result.insertedIds.push(i.id);
+        else result.skippedIds.push(i.id);
+      }
+      await this.assertSession();
+      result.library = await readLibrary();
+      return result;
     });
   }
   replaceLibrary(list: Ingredient[]) {

@@ -3,6 +3,7 @@ import {
   deriveGrainPpg,
   findDuplicateNames,
   seedLibrary,
+  historicalSheetLibrary,
   snapshotIngredient,
   snapshotState,
   validateIngredientDraft,
@@ -14,7 +15,7 @@ import { calculateGrainBill, DEFAULT_CALC_SETTINGS } from "../calculator";
 const NOW = "2026-11-13T00:00:00.000Z";
 
 describe("seed library", () => {
-  const lib = seedLibrary(NOW);
+  const lib = historicalSheetLibrary(NOW);
   it("includes all 23 reference entries verbatim", () => {
     expect(lib).toHaveLength(23);
     lib.forEach((i, idx) => {

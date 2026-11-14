@@ -12,6 +12,10 @@ export const Route = createFileRoute("/")({
         content:
           "Plan a grain bill and explore standard malt values. Free brewing tools, no account needed.",
       },
+      { property: "og:title", content: "Brewing tools · lowcase Brewing" },
+      { property: "og:description", content: "Public grain bill planning and standard malt reference." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ToolsHome,

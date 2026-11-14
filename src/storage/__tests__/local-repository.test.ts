@@ -19,7 +19,7 @@ describe("LocalBrewRepository", () => {
     const store = memStore();
     const repo = new LocalBrewRepository(store, () => NOW);
     const snap = await repo.loadAll();
-    expect(snap.library).toHaveLength(23);
+    expect(snap.library).toHaveLength(48);
     expect(snap.issues).toEqual([]);
     await repo.upsertRecipe(recipe);
     const again = await new LocalBrewRepository(store, () => NOW).loadAll();
