@@ -25,6 +25,11 @@
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
   --color-background: var(--background);
+  --color-apple-button: var(--apple-button);
+  --color-apple-button-foreground: var(--apple-button-foreground);
+  --color-google-button: var(--google-button);
+  --color-google-button-foreground: var(--google-button-foreground);
+  --color-google-button-border: var(--google-button-border);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -72,6 +77,11 @@
 }
 
 :root {
+  --apple-button: #000000;
+  --apple-button-foreground: #ffffff;
+  --google-button: #ffffff;
+  --google-button-foreground: #1f1f1f;
+  --google-button-border: #747775;
   --radius: 0.6rem;
   --background: oklch(0.975 0.011 85);
   --foreground: oklch(0.25 0.03 155);
