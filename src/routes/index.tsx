@@ -32,9 +32,14 @@ function ToolsHome() {
             <br />
             <span className="text-primary">something good.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            Work out your grain bill, get a gravity estimate, and get to know your ingredients. A
-            few useful tools from the lowcase brew bench.
+          <p className="mt-6 max-w-xl text-lg font-semibold leading-relaxed text-foreground">
+            Build your next grain bill. There’s more brewing.
+          </p>
+          <p className="mt-3 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            Explore our Malt Library and calculate your grain bill—free, with no account required.
+            We’re also testing a private recipe workbench, where you’ll be able to turn those grain
+            bills into recipes and save them in your lowcase Brewing account. Account access will
+            open after beta testing is complete.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <Button asChild size="lg">
