@@ -1,5 +1,8 @@
 # QA roadmap
 
+- [ ] Remove public raw history/source-sheet links, shorten card notes, and label account reference overrides without changing stored data.
+- [ ] Run catalog/privacy/customization/update regressions and full tests; report platform validation and final commit without publishing.
+
 - [x] Expand active standard catalog to 48, preserve 23-row history and 8 legacy buckets, audit official sources/yield bases.
 - [x] Add reviewed, selected, insert-only private library additions with conflict/retry safeguards.
 - [x] Verify 154 tests, automatic typecheck/build, public/mobile calculator/reference and simulated private update flow; stop before publication.

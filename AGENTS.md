@@ -45,3 +45,4 @@ use the editor.
 - Public tools (`/`, `/tools/*`) use page memory only and never import the account client, `BrewStoreProvider` or auth init; the private dashboard lives at `/workbench`, keeping guest use separate from invite-only accounts.
 - Keep the expanded standard catalog separate from the immutable historical sheet records; reference metadata is keyed by stable ingredient id so old documents and numeric snapshots remain compatible.
 - Library updates use explicit selected-id, insert-only repository operations with fresh duplicate checks and conflict-ignore writes; never apply catalog changes to existing accounts on login.
+- Keep public card prose and reference-customization comparisons in the pure malt-presentation module; presentation must never rewrite ingredient documents or snapshot values.

@@ -201,7 +201,7 @@ function Library({ onEdit }: { onEdit: (i: Ingredient) => void }) {
             </div>
             {i.flavor && <p className="mt-3 text-sm">{i.flavor}</p>}
             {i.notes && <p className="mt-2 text-xs italic text-muted-foreground">{i.notes}</p>}
-            <MaltDetails id={i.id}/>
+            <MaltDetails id={i.id} accountIngredient={i}/>
             <div className="mt-auto flex justify-end gap-1 pt-3">
               <Button variant="ghost" size="sm" onClick={() => onEdit(i)}>
                 <Pencil /> Edit
