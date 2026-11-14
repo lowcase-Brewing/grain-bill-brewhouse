@@ -10,6 +10,9 @@ import { Label } from "@/components/ui/label";
 import { INGREDIENT_CATEGORIES } from "@/domain/types";
 import { formatPpg } from "@/domain/format";
 import { PUBLIC_REFERENCE_LIBRARY, PUBLIC_REFERENCE_VERSION } from "@/domain/public-reference";
+import { ingredientSearchText } from "@/domain/library-updates";
+import { MaltDetails } from "@/components/brew/malt-details";
+import { historicalSheetLibrary } from "@/domain/library";
 
 export const Route = createFileRoute("/tools/malts")({
   head: () => ({
@@ -19,6 +22,10 @@ export const Route = createFileRoute("/tools/malts")({
         name: "description",
         content: "Browse planning values and flavor notes for malts, adjuncts, and extracts.",
       },
+      { property: "og:title", content: "Standard malt reference · lowcase Brewing" },
+      { property: "og:description", content: "Product sources and planning potentials for 48 brewing ingredients." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: PublicMalts,
@@ -31,7 +38,7 @@ function PublicMalts() {
   const matches = PUBLIC_REFERENCE_LIBRARY.filter(
     (i) =>
       (category === "All" || i.category === category) &&
-      `${i.name} ${i.origin} ${i.flavor} ${i.category}`.toLocaleLowerCase().includes(q),
+      ingredientSearchText(i).includes(q),
   );
   return (
     <PublicShell>
@@ -48,8 +55,9 @@ function PublicMalts() {
         }
       />
       <p className="mb-7 rounded-xl border border-amber/30 bg-amber-soft px-5 py-4 text-sm leading-relaxed text-amber-foreground">
-        These are generic planning values, not measured specifications for your equipment or a
-        particular malt lot. Check the actual product specification when precision matters.
+        Planning potentials use manufacturer analysis where available and clearly labeled estimates
+        otherwise. They are not measured yields for your equipment or malt lot. This expanded catalog
+        is not the original Google Sheet snapshot.
         Reference version: {PUBLIC_REFERENCE_VERSION}.
       </p>
       <div className="mb-6 flex flex-wrap items-end gap-4">
@@ -100,6 +108,7 @@ function PublicMalts() {
             <p className="mt-4 border-t border-border pt-3 text-xs leading-relaxed text-muted-foreground">
               {i.notes}
             </p>
+            <MaltDetails id={i.id}/>
           </article>
         ))}
       </div>
@@ -124,6 +133,11 @@ function PublicMalts() {
         This is the shared standard reference. Personal library changes stay in the private account
         workbench.
       </p>
+      <details className="mt-6 border-t border-border pt-4 text-sm">
+        <summary className="cursor-pointer font-medium text-primary">Historical Google Sheet reference · 23 entries · 2026-11-13</summary>
+        <p className="mt-3 text-xs text-muted-foreground">Original names and numeric planning values, unchanged. Broad buckets are legacy references, not active defaults.</p>
+        <ul className="mt-3 space-y-2">{historicalSheetLibrary("2026-11-13T00:00:00Z").map((i) => <li key={i.id}><strong>{i.name}</strong> · {i.category} · {String(i.ppg)} PPG · {i.extractFraction === null ? "Direct potential" : `fraction ${i.extractFraction}`}<p className="text-xs text-muted-foreground">{i.flavor} {i.notes}</p></li>)}</ul>
+      </details>
     </PublicShell>
   );
 }
