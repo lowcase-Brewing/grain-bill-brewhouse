@@ -3,9 +3,17 @@
 ## Inventory and provenance
 
 - Full catalog: `src/domain/standard-malts.ts` (56 identities: **48 active**, **8 legacy**).
-- Original sheet: `src/domain/seed-malts.ts` (unchanged 23 records). Public reference includes an expandable historical list with original names, numeric fractions, PPG, and notes.
+- Original sheet: `src/domain/seed-malts.ts` (unchanged 23 records), retained through `historicalSheetLibrary` for fixtures, compatibility and private data only. The raw historical section has been removed from `/tools/malts`.
 - Active entries comprise 15 retained original ingredients and 33 specific products. All original ids/potentials remain unchanged, including `seed-flakes-oats`; active display reads Flaked Oats, and Flakes Oats is a recognized alias. Old saved rows and account entries are not rewritten.
 - Product source URL, checked date, manufacturer/product, source-unit color, handling, aliases and yield basis are attached in the catalog's reference records. Official sources were checked 2026-11-14. Historical values retain their original 2026-11-13 provenance.
+
+## Publication-review corrections — 2026-11-14
+
+- Historical reference metadata now has **no source URL**. Shared details show plain “Original lowcase planning reference, 2026-11-13” provenance, never a clickable private Google Sheet link. No sheet-sharing changes were made.
+- Public prose continues to strip “Used in Novena Noche”, orphan `[1]` references and private sheet-cell explanations. Raw historical notes are not rendered publicly.
+- Public product cards show flavor and short handling notes; full numeric yield derivations remain in the collapsed Product & yield details. Stored ingredient notes, account personal notes, numeric potentials, historical records and exported snapshots were not changed.
+- Private library details explicitly label **Standard reference specs** and state that account-displayed values take precedence. Name, PPG, fraction or category differences receive a customization notice: edited values are not manufacturer-verified by the reference. This is presentation only; no saved documents are rewritten.
+- All new official source URLs were independently checked by the owner (HTTP 200), including the seven generated extract PDFs; this follow-up did not repeat source research.
 
 ## Yield audit
 
@@ -56,7 +64,7 @@ No schema/policy/grant changes, SQL migrations, administrative library updates, 
 
 **Concurrency limitation:** with the unchanged schema, name/alias checks cannot be a database-atomic uniqueness constraint across simultaneous devices inserting different ids. Stable-id conflicts are atomically ignored. Refresh/recheck reduces stale-preview risk but does not promise cross-device name transaction isolation. New analysis requires actual product/lot verification for precision.
 
-## Verification
+## Previous expansion verification
 
 - `bunx vitest run`: **154 tests / 18 files passed**.
 - Latest automatic preview typecheck/build validation: **build OK**; manual production build was not run (platform workflow).
@@ -64,3 +72,12 @@ No schema/policy/grant changes, SQL migrations, administrative library updates, 
 - Simulated private browser repository: original 23 records, one selected Rye addition, injected failure, successful retry to 24 records, old Flakes Oats and Smoked Malts still untouched. Cloud adapter tests use an in-memory account client, including partial failure/retry, alias conflict, conflict-ignore and account-change rejection.
 - Read-only hosted checks: `disable_signup=true`; anonymous reads HTTP 401 on all five app tables; existing owner-only policies retained.
 - Real account updates and OAuth/email authorization were intentionally not exercised. No hosted user records were changed.
+
+## Focused follow-up validation
+
+- Full `bunx vitest run`: **161 tests / 19 files passed** on 2026-11-14 at 19:48 UTC. Includes public no-sheet-link/no-raw-history/no-private-prose regression, all 23 historical metadata entries without a URL, separate customized name/PPG/fraction cases, short notes with unchanged numeric/stored values, existing exact calculator parity, and a simulated 23-entry customized library reviewing details then inserting only the selected Rye to reach 24 entries without overwriting old records. Existing failure/retry, alias/conflict-ignore and account-switch tests also passed.
+- Browser desktop and 390px mobile: public cards show short notes closed and full derivation opened; historical provenance is plain text with no private sheet link; no raw historical section or private project prose; no horizontal overflow. Reference results remain **13 lb total / 9 lb mashed grain / OG 1.060 / +8.3 pts**. Zero page errors and zero guest account API requests were observed.
+- Latest platform automatic validation signal after code changes: `/tmp/observability/build-errors.log`, **2026-11-14T19:48:47Z — build OK**. Manual builds and typechecks are expressly disallowed by this environment because its harness runs them. The exposed signal does **not** distinguish a standalone typecheck from a production build; neither is independently claimed here. A separately identified production-validation result remains unavailable before deployment.
+- The full suite emits existing reset-password test-container warnings (empty href and html under div); tests pass and the checked public browser pages have no page errors. These unrelated tests were not redesigned.
+- No packages, auth settings, schema, policies, grants, users, emails or real account data were changed. Disabled signup and owner-only RLS were preserved, not freshly reconfigured or rechecked. No publication occurred.
+- Catalog inventory is still **48 active / 8 legacy / 23 immutable historical records**, version **2026-11-14.1**. Yield classifications remain **20 new manufacturer-analysis-derived potentials**, **13 new generic estimates**, **15 active historical estimates** (plus 8 legacy historical estimates); the estimated-value table above remains authoritative.
