@@ -42,3 +42,4 @@ use the editor.
 - Keep browser storage access behind the hydrated store provider; TanStack Start SSR must not read browser-only state.
 - Keep JSON, Markdown, and manifest exports client-generated; no Finder, Drive, or AppleScript automation is active.
 - Run focused Vitest coverage for numeric parity, validation, snapshots, storage, and exports whenever those rules change.
+- Public tools (`/`, `/tools/*`) use page memory only and never import the account client, `BrewStoreProvider` or auth init; the private dashboard lives at `/workbench`, keeping guest use separate from invite-only accounts.
