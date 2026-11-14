@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthCard } from "@/components/brew/auth-card";
+import { SocialSignIn } from "@/components/brew/social-sign-in";
 import { supabase } from "@/integrations/supabase/client";
 
 const search = z.object({ redirect: z.string().optional() });
@@ -101,6 +102,7 @@ function AuthPage() {
         {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
         <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
       </form>
+      <SocialSignIn destination={() => safePath(redirect)} disabled={busy} onError={setError} onSignedIn={async (path) => { await navigate({ href: path, replace: true }); }} />
       <Button variant="link" className="mt-3 px-0" onClick={() => { setMode("forgot"); setError(null); }}>Forgot password?</Button>
     </AuthCard>
   );

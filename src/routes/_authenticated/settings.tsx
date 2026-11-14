@@ -58,7 +58,7 @@ function Body() {
             <li>Recipes, calculator drafts, malt library edits and these settings are saved to your signed-in account, so another browser or device signed in as you sees them.</li>
             <li>Each account's data is private: the database only lets the signed-in owner read or change their own rows. Accounts are invite-only; public sign-up is off.</li>
             <li>A change is shown as saved only after the cloud confirms it. If a save fails you'll see an error — download a backup to keep an offline copy.</li>
-            <li>This Lovable project's editor is accessible to the workspace on the current plan (owner-only editor access needs Business/Enterprise). The app is unpublished. AppleScript, Finder and Drive automation are not connected.</li>
+            <li>This Lovable project's editor is accessible to the workspace on the current plan (owner-only editor access needs Business/Enterprise). The invite-only beta is published at brew.lowcasebrewing.com. AppleScript, Finder and Drive automation are not connected.</li>
           </ul>
           {data.issues.map((issue) => (
             <div key={issue.section} className="rounded-md border border-amber/40 bg-amber-soft p-3 text-amber-foreground">
@@ -148,7 +148,6 @@ function Body() {
 
       <Panel title="Planned integrations" description="Not active.">
         <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-          <li>Google sign-in: not added yet; this version uses invite-only email and password accounts.</li>
           <li>Desktop helper or Google Drive integration: would consume the project manifest to create folders, after the AppleScript mapping is approved.</li>
           <li>Live Google Sheet sync: not planned yet; the library is a read-only snapshot from 2026-11-13.</li>
         </ul>

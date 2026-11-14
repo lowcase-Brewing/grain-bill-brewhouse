@@ -31,6 +31,8 @@ use the editor.
 
 ## lowcase Brewing architecture
 
+- Social sign-in uses the generated Lovable helper and a public `/auth` callback; navigate to the sanitized destination only after validated session confirmation to preserve the existing private-route gate.
+
 - Keep calculator, recipe, library, workflow, and export rules in pure modules under `src/domain/`; this preserves formula parity and makes storage or UI changes independently testable.
 - UI code accesses persistence only through `BrewRepository`; signed-in screens use `CloudBrewRepository` bound to one user id, keeping storage swappable without rewriting screens.
 - Private routes live under `src/routes/_authenticated/`, whose layout keys `BrewStoreProvider` by user id; this discards prior-account state and late responses on sign-out or account switch.

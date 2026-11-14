@@ -1,10 +1,10 @@
 # lowcase Brewing
 
-A private, invite-only brewing workbench for lowcase Brewing in Weslaco, Texas. This is an unpublished functional MVP for recipe projects and grain bill calculations, not a marketing site.
+A private, invite-only brewing workbench for lowcase Brewing in Weslaco, Texas. The beta is published at https://brew.lowcasebrewing.com for recipe projects and grain bill calculations, not as a marketing site.
 
 ## What is implemented
 
-- Invite-only email/password accounts: sign in, sign out, password reset and invitation password setup (with expired-link handling). No public sign-up.
+- Invite-only accounts with email/password, Apple and Google sign-in: sign out, password reset and invitation password setup (with expired-link handling). No public sign-up.
 - Private per-account cloud saving of recipes, library, settings and drafts, plus an optional, reviewed import of older browser-only data.
 - Dashboard with real saved recipe, saved-OG, draft, and library counts.
 - Recipe creation, search, editing, duplication, deletion, and versioned JSON import.
@@ -20,16 +20,16 @@ The app predicts gravity only. It does not calculate ABV, attenuation, color, ho
 
 ## Accounts, cloud saving and project access
 
-- Sign-in is email + password. Public sign-up is **disabled in the backend** (verified: a direct sign-up call returns "Signups not allowed for this instance"). The owner adds accounts in Lovable under **Cloud → Users → Add user** (Send invitation, or Create new user with a password). The agent has not sent any invitation or reset email.
+- Sign-in supports email + password, Apple and Google. Public sign-up stays disabled; social sign-in does not authorize opening registration. Use the email associated with your invited account; Apple Hide My Email may use a different identity rather than your existing account. The owner adds accounts in Lovable under **Cloud → Users → Add user**. One owner-approved invitation was previously sent; no emails are sent as part of this update.
 - Invitation links open the app, which routes to `/reset-password` to choose a password. "Forgot password?" sends a reset link to `/reset-password`. Expired or used links show a clear message.
 - All workbench pages require sign-in; nothing private renders before the session check finishes.
 - Data lives in five owner-scoped tables (`brew_recipes`, `brew_ingredients`, `brew_settings`, `brew_drafts`, `brew_account_state`). Each stores a validated, schema-versioned JSON document. Row-level security allows only `owner_id = auth.uid()` for select/insert/update/delete; anonymous clients have no table grants. Owner ids are checked by the database, not trusted from the browser.
 - Each new account gets its own copy of the 23 source malts once (recorded in `brew_account_state`); an emptied library stays empty.
 - Browser data from before accounts is never imported automatically. Settings shows counts and imports only new items; existing cloud items are never overwritten and retries add nothing. Browser originals are left untouched.
 - "Saved to your account" appears only after the backend confirms a write; failures show an error.
-- Not yet: offline editing, conflict merging between two devices editing the same item at once (last save wins), Google sign-in.
+- Not yet: offline editing, conflict merging between two devices editing the same item at once (last save wins).
 
-The Lovable project remains **unpublished**. Its editor is workspace-accessible on the current plan; owner-only editor access requires Business/Enterprise.
+The invite-only beta is **published** at https://brew.lowcasebrewing.com. Its editor is workspace-accessible on the current plan; owner-only editor access requires Business/Enterprise.
 
 ## Source and formula mapping
 
