@@ -20,7 +20,7 @@ The app predicts gravity only. It does not calculate ABV, attenuation, color, ho
 
 ## Accounts, cloud saving and project access
 
-- Sign-in supports email + password, Apple and Google. Invite-only registration remains required, but the hosted settings read on 2026-11-14 reports `disable_signup=false`; the owner must enable **Disable sign-up** in **More → Users → Auth settings**. No public signup form was added. Use the email associated with your invited account; Apple Hide My Email may use a different identity rather than your existing account. The owner adds accounts in Lovable under **Cloud → Users → Add user**. One owner-approved invitation was previously sent; no emails are sent as part of this update.
+- Sign-in supports email + password, Apple and Google. Registration is invite-only: on 2026-11-14 the owner turned on **Disable sign-up**, and the hosted auth settings now report `disable_signup=true`. No public signup form was added. Use the email associated with your invited account; Apple Hide My Email may use a different identity rather than your existing account. The owner adds accounts in Lovable under **Cloud → Users → Add user**. One owner-approved invitation was previously sent; no emails are sent as part of this update.
 - Invitation links open the app, which routes to `/reset-password` to choose a password. "Forgot password?" sends a reset link to `/reset-password`. Expired or used links show a clear message.
 - All workbench pages require sign-in; nothing private renders before the session check finishes.
 - Data lives in five owner-scoped tables (`brew_recipes`, `brew_ingredients`, `brew_settings`, `brew_drafts`, `brew_account_state`). Each stores a validated, schema-versioned JSON document. Row-level security allows only `owner_id = auth.uid()` for select/insert/update/delete; anonymous clients have no table grants. Owner ids are checked by the database, not trusted from the browser.
@@ -88,7 +88,9 @@ The original AppleScript was not provided, so exact naming and action mapping ar
 
 ## Development and verification
 
-Social sign-in update (2026-11-14): 103 tests passed, including provider errors, public callback destinations, and session validation. Desktop and mobile sign-in pages render both official branded buttons without page errors or horizontal overflow. Actual Apple/Google account authorization has not been completed in testing. Public registration must be disabled as noted above before relying on invite-only access.
+Public-tools integration (2026-11-14): 141 tests, strict typecheck and production build passed. Backend settings report `disable_signup=true`; all five brewing-data tables deny anonymous access (HTTP 401); owner-only row-level security is unchanged. Real Apple/Google sign-in, invitation and password-reset roundtrips still need owner testing.
+
+Social sign-in update (2026-11-14): 103 tests passed, including provider errors, public callback destinations, and session validation. Desktop and mobile sign-in pages render both official branded buttons without page errors or horizontal overflow. Actual Apple/Google account authorization has not been completed in testing. Public registration is now disabled (verified 2026-11-14).
 
 ```sh
 bun install
