@@ -55,9 +55,8 @@ function PublicMalts() {
         }
       />
       <p className="mb-7 rounded-xl border border-amber/30 bg-amber-soft px-5 py-4 text-sm leading-relaxed text-amber-foreground">
-        Planning potentials use manufacturer analysis where available and clearly labeled estimates
-        otherwise. They are not measured yields for your equipment or malt lot. This expanded catalog
-        is not the original Google Sheet snapshot.
+        Planning potentials use manufacturer analysis where available and clearly labeled
+        estimates otherwise. They are not measured yields for your equipment or malt lot.
         Reference version: {PUBLIC_REFERENCE_VERSION}.
       </p>
       <div className="mb-6 flex flex-wrap items-end gap-4">
