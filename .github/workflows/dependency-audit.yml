@@ -1,0 +1,107 @@
+name: Dependency audit
+
+on:
+  schedule:
+    # Monday at 14:17 UTC: 8:17 a.m. CST / 9:17 a.m. CDT.
+    - cron: "17 14 * * 1"
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
+      - ".github/workflows/dependency-audit.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-audit-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Audit locked dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.4.4"
+
+      # Audit reads bun.lock directly. No install, lifecycle scripts, app
+      # credentials, or backend connection are needed.
+      - name: Audit all dependencies
+        id: full
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          bun audit 2>&1 | tee audit-results/full.txt
+
+      - name: Audit production dependencies
+        id: production
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          mkdir -p audit-results
+          bun audit --prod 2>&1 | tee audit-results/production.txt
+
+      - name: Write the audit summary
+        if: always()
+        env:
+          FULL_AUDIT_OUTCOME: ${{ steps.full.outcome }}
+          PRODUCTION_AUDIT_OUTCOME: ${{ steps.production.outcome }}
+        run: |
+          set -euo pipefail
+          {
+            printf '## Dependency audit\n\n'
+            printf '| Scope | Result |\n| --- | --- |\n'
+            printf '| All dependencies | %s |\n' "$FULL_AUDIT_OUTCOME"
+            printf '| Production dependencies | %s |\n\n' "$PRODUCTION_AUDIT_OUTCOME"
+            printf 'A failure means vulnerabilities were reported or the audit could not complete. Review the reports below.\n\n'
+            printf 'The production filter is a dependency check, not a deployed-code security assessment.\n'
+            for scope in full production; do
+              printf '\n### %s audit\n\n' "$scope"
+              if [[ -f "audit-results/$scope.txt" ]]; then
+                printf '````text\n'
+                cat "audit-results/$scope.txt"
+                printf '\n````\n'
+              else
+                printf 'No report was produced. Check the setup and audit steps.\n'
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save audit reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dependency-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: audit-results/*.txt
+          retention-days: 14
+          if-no-files-found: warn
+
+      # The audit steps continue so both reports survive a finding. Restore a
+      # failing job status here so findings and lookup failures trigger alerts.
+      - name: Require both audits to succeed
+        if: always()
+        env:
+          FULL_AUDIT_OUTCOME: ${{ steps.full.outcome }}
+          PRODUCTION_AUDIT_OUTCOME: ${{ steps.production.outcome }}
+        run: |
+          set -euo pipefail
+          if [[ "$FULL_AUDIT_OUTCOME" != "success" || "$PRODUCTION_AUDIT_OUTCOME" != "success" ]]; then
+            echo "::error::Dependency audit reported vulnerabilities or could not complete. Review the summary and saved reports."
+            exit 1
+          fi

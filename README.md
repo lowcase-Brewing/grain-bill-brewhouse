@@ -88,6 +88,40 @@ The original AppleScript was not provided, so exact naming and action mapping ar
 
 ## Development and verification
 
+### Scheduled dependency audits
+
+The **Dependency audit** GitHub Actions workflow checks the committed `bun.lock`
+every Monday at 14:17 UTC (8:17 a.m. CST / 9:17 a.m. CDT). It also runs on pull
+requests into `main` that change the dependency files or the workflow itself.
+After the workflow exists on the default branch, use **Actions → Dependency
+audit → Run workflow** for an on-demand check, choosing the branch to audit.
+Scheduled checks always audit the default branch; an unmerged local patch is
+not included. GitHub may delay scheduled runs.
+
+Each run performs both `bun audit` and `bun audit --prod`, writes a summary,
+and saves text reports for 14 days. Any reported vulnerability, including a
+development dependency, or an audit error makes the run fail. The workflow
+does not install packages, run the app, apply fixes, or publish a release. It
+needs no app secrets or account access. Audit sends dependency metadata to the
+package advisory service. A clean production-filter result is not proof that
+the deployed app is free of security issues.
+
+For email or web alerts, enable **GitHub account Settings → Notifications →
+Actions** and choose either failed runs only or all completed runs. GitHub's
+native scheduled-run notifications go to the user associated with the schedule
+(normally the person who last changed its cron expression), not automatically
+to every repository member. Use a manual run after merging to check the reports
+and your own notification preferences; that does not test the scheduled-run
+recipient. Collaborators can also read summaries and reports in the repository's
+Actions tab. These jobs use GitHub Actions minutes and artifact
+storage, not Lovable Build credits; private-repository allowances depend on
+the GitHub plan.
+
+The workflow pins its action revisions and Bun version for reproducibility.
+Review those pins during dependency maintenance. Because PRs are filtered by
+changed paths, do not make this workflow a required check for every PR without
+first removing or adjusting the path filter.
+
 Public-tools integration (2026-11-14): 141 tests, strict typecheck and production build passed. Backend settings report `disable_signup=true`; all five brewing-data tables deny anonymous access (HTTP 401); owner-only row-level security is unchanged. Real Apple/Google sign-in, invitation and password-reset roundtrips still need owner testing.
 
 Social sign-in update (2026-11-14): 103 tests passed, including provider errors, public callback destinations, and session validation. Desktop and mobile sign-in pages render both official branded buttons without page errors or horizontal overflow. Actual Apple/Google account authorization has not been completed in testing. Public registration is now disabled (verified 2026-11-14).
